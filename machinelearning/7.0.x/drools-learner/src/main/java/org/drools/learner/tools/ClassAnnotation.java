@@ -4,5 +4,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 public @interface ClassAnnotation {
-	String label_element() default "";
+	String labelElement() default "";
 }

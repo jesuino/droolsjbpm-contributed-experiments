@@ -25,9 +25,9 @@ public class AdaBoostKBuilder extends DecisionTreeBuilder{
 	private static final boolean WITH_REP = false;
 	
 	private ArrayList<DecisionTree> forest;
-	private ArrayList<Double> classifier_accuracy;
+	private ArrayList<Double> classifierAccuracy;
 	
-	private Solution best_solution;
+	private Solution bestSolution;
 	//private Learner trainer;
 	
 	private DecisionTreeMerger merger;
@@ -43,9 +43,9 @@ public class AdaBoostKBuilder extends DecisionTreeBuilder{
 //	public void setTestRatio(double ratio) {
 //		testRatio = ratio;
 //	}
-	public void internalBuild(SolutionSet sol, Learner _trainer) {
+	public void internalBuild(SolutionSet sol, Learner trainer) {
 		
-		_trainer.setInputSpec(sol.getInputSpec());
+		trainer.setInputSpec(sol.getInputSpec());
 		
 		
 		if (sol.getInputSpec().getTargets().size()>1 ) {
@@ -54,7 +54,7 @@ public class AdaBoostKBuilder extends DecisionTreeBuilder{
 				flog.error().log("There is more than 1 target candidates");
 			System.exit(0);
 			// TODO put the feature not supported exception || implement it
-		} else if (_trainer.getTargetDomain().getCategoryCount() <=2) {
+		} else if (trainer.getTargetDomain().getCategoryCount() <=2) {
 			if (flog.warn() !=null)
 				flog.warn().log("The target domain is binary!!! Do u really need that one");
 		}
@@ -62,31 +62,31 @@ public class AdaBoostKBuilder extends DecisionTreeBuilder{
 		int N = sol.getTrainSet().getSize();
 		//_trainer.setTrainingDataSize(N); not only N data is fed. 
 		
-		int K = _trainer.getTargetDomain().getCategoryCount();
+		int K = trainer.getTargetDomain().getCategoryCount();
 		int M = (int)(TREE_SIZE_RATIO * N);
-		_trainer.setTrainingDataSizePerTree(M);
+		trainer.setTrainingDataSizePerTree(M);
 		/* M data fed to each tree, there are FOREST_SIZE trees*/
-		_trainer.setTrainingDataSize(M * FOREST_SIZE); 
+		trainer.setTrainingDataSize(M * FOREST_SIZE); 
 
 		
 		forest = new ArrayList<DecisionTree> (FOREST_SIZE);
-		classifier_accuracy = new ArrayList<Double>(FOREST_SIZE);
+		classifierAccuracy = new ArrayList<Double>(FOREST_SIZE);
 		//Initialize the weight wij  (i = 1,...,m (number of instances) and j = 1,...,K (number of classes))
 		double[][] weight = new double[M][K];
-		for (int index_i=0; index_i<M; index_i++) {
-			for (int index_j=0; index_j<K; index_j++) {
-				Instance inst_i = sol.getTrainSet().getInstance(index_i);
+		for (int indexI=0; indexI<M; indexI++) {
+			for (int indexJ=0; indexJ<K; indexJ++) {
+				Instance instI = sol.getTrainSet().getInstance(indexI);
 				
-				Object instance_target = inst_i.getAttrValue(_trainer.getTargetDomain().getFReferenceName());
-				Object instance_target_category = _trainer.getTargetDomain().getCategoryOf(instance_target);
-				Object target_category= _trainer.getTargetDomain().getCategory(index_j);
+				Object instanceTarget = instI.getAttrValue(trainer.getTargetDomain().getFReferenceName());
+				Object instanceTargetCategory = trainer.getTargetDomain().getCategoryOf(instanceTarget);
+				Object targetCategory= trainer.getTargetDomain().getCategory(indexJ);
 				
-				if (AttributeValueComparator.instance.compare(instance_target_category, target_category) == 0) {
+				if (AttributeValueComparator.instance.compare(instanceTargetCategory, targetCategory) == 0) {
 					//if y_i == u_j => the instance i is in class n.
-					weight[index_i][index_j]= 0;
+					weight[indexI][indexJ]= 0;
 				} else {
 					// mistake
-					weight[index_i][index_j]= 1;
+					weight[indexI][indexJ]= 1;
 				} 
 				
 			}
@@ -97,21 +97,21 @@ public class AdaBoostKBuilder extends DecisionTreeBuilder{
 		while (i++ < FOREST_SIZE ) {
 			// a.  Normalize wij
 			if (WITH_REP)
-				bag = Util.bag_w_rep(M, N);
+				bag = Util.bagWRep(M, N);
 			else
-				bag = Util.bag_wo_rep(M, N);
+				bag = Util.bagWoRep(M, N);
 			
 
 			// b. Train h_t(x) by minimizing loss function
 			
-			InstanceList working_instances = sol.getTrainSet().getInstances(bag);			
-			DecisionTree dt = _trainer.train_tree(working_instances);
+			InstanceList workingInstances = sol.getTrainSet().getInstances(bag);			
+			DecisionTree dt = trainer.trainTree(workingInstances);
 			dt.setID(i);
 			
 			double error = 0.0;
 			SingleTreeTester t= new SingleTreeTester(dt);
-			for (int index_i = 0; index_i < M; index_i++) {
-				Integer result = t.test(sol.getTrainSet().getInstance(index_i));
+			for (int indexI = 0; indexI < M; indexI++) {
+				Integer result = t.test(sol.getTrainSet().getInstance(indexI));
 				if (result == Stats.INCORRECT) {
 				
 					//error += distribution.get(index_i);
@@ -123,12 +123,12 @@ public class AdaBoostKBuilder extends DecisionTreeBuilder{
 				
 				if (error < 0.5d) {
 					// The classification accuracy of the weak classifier
-					classifier_accuracy.add(alpha);
+					classifierAccuracy.add(alpha);
 					
-					double norm_fact= 0.0d;
+					double normFact= 0.0d;
 					// Update the weight matrix wij:
-					for (int index_i = 0; index_i < M; index_i++) {
-						Integer result = t.test(sol.getTrainSet().getInstance(index_i));//TODO dont need to test two times
+					for (int indexI = 0; indexI < M; indexI++) {
+						Integer result = t.test(sol.getTrainSet().getInstance(indexI));//TODO dont need to test two times
 						switch (result) {
 						case Stats.INCORRECT:
 							//distribution.set(index_i, distribution.get(index_i) * Util.exp(alpha));
@@ -145,7 +145,7 @@ public class AdaBoostKBuilder extends DecisionTreeBuilder{
 						//norm_fact += distribution.get(index_i);
 					}
 					// Normalization of the weights
-					for (int index_i = 0; index_i < M; index_i++) {
+					for (int indexI = 0; indexI < M; indexI++) {
 						//distribution.set(index_i, distribution.get(index_i) / norm_fact);
 					}
 				} else {
@@ -164,7 +164,7 @@ public class AdaBoostKBuilder extends DecisionTreeBuilder{
 					slog.stat().log("All instances classified correctly TERMINATE, forest size:"+i+ "\n");
 				// What to do here??
 				FOREST_SIZE = i;
-				classifier_accuracy.add(10.0); // TODO add a very big number
+				classifierAccuracy.add(10.0); // TODO add a very big number
 				
 				
 			}
@@ -191,7 +191,7 @@ public class AdaBoostKBuilder extends DecisionTreeBuilder{
 		return forest;
 	}
 	public ArrayList<Double> getAccuracies() {
-		return classifier_accuracy;
+		return classifierAccuracy;
 	}
 	public TreeAlgo getTreeAlgo() {
 		return algorithm; //TreeAlgo.BAG; // default
@@ -204,6 +204,6 @@ public class AdaBoostKBuilder extends DecisionTreeBuilder{
 	}
 	
 	public Solution getBestSolution() {
-		return best_solution;
+		return bestSolution;
 	}
 }

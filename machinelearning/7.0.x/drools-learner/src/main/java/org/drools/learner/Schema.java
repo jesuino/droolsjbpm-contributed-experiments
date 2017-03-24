@@ -16,12 +16,12 @@ import org.drools.learner.tools.FeatureNotSupported;
 
 public class Schema {
 	
-	public static Schema createSchemaStructure(Class<?> clazz, DomainAlgo domain_type, DataType data_type) throws Exception {
+	public static Schema createSchemaStructure(Class<?> clazz, DomainAlgo domainType, DataType dataType) throws Exception {
 		Schema schema = new Schema(clazz);
 		//�ClassFieldExtractorCache cache = ClassFieldExtractorCache.getInstance();
 
 		// schema is modified
-		ClassVisitor visitor = new ClassVisitor(schema, domain_type, data_type);
+		ClassVisitor visitor = new ClassVisitor(schema, domainType, dataType);
 		visitor.visit();
 		
 		
@@ -56,8 +56,8 @@ public class Schema {
 
 	private HashSet<String> targets;
 	
-	public Schema(Class<?> _klass) {
-		this.klass = _klass;
+	public Schema(Class<?> klass) {
+		this.klass = klass;
 		
 		this.klassStructure = new HashMap<Class<?>,ClassStructure>();
 		this.extractorMap = new HashMap<String, ReadAccessor>();
@@ -77,11 +77,11 @@ public class Schema {
 		klassStructure.put(clazz, structure);;
 	}
 	
-	public void addParentField(String attr_name, Field klass) {
-		if (!this.attrRelationMap.containsKey(attr_name)) {
-			this.attrRelationMap.put(attr_name, new ArrayList<Field>());
+	public void addParentField(String attrName, Field klass) {
+		if (!this.attrRelationMap.containsKey(attrName)) {
+			this.attrRelationMap.put(attrName, new ArrayList<Field>());
 		}
-		this.attrRelationMap.get(attr_name).add(klass);
+		this.attrRelationMap.get(attrName).add(klass);
 	}
 	
 	public HashMap<String, ArrayList<Field>> getAttrRelationMap() {
@@ -89,8 +89,8 @@ public class Schema {
 	}
 	
 	
-	public boolean addTarget(String _target) {
-		return targets.add(_target);
+	public boolean addTarget(String target) {
+		return targets.add(target);
 	}
 	
 	public void clearTargets() {
@@ -101,19 +101,19 @@ public class Schema {
 		return this.domainMap.keySet();
 	}
 	
-	public void putDomain(String attr_name, Domain d) {
-		domainMap.put(attr_name, d);
+	public void putDomain(String attrName, Domain d) {
+		domainMap.put(attrName, d);
 	}
 	
-	public Domain getAttrDomain(String attr_name) {
-		return this.domainMap.get(attr_name);
+	public Domain getAttrDomain(String attrName) {
+		return this.domainMap.get(attrName);
 	}
 	
-	public void putExtractor(String attr_name, ReadAccessor extract) {
-		extractorMap.put(attr_name, extract);
+	public void putExtractor(String attrName, ReadAccessor extract) {
+		extractorMap.put(attrName, extract);
 	}
-	public ReadAccessor getAttrExtractor(String attr_name) {
-		return this.extractorMap.get(attr_name);
+	public ReadAccessor getAttrExtractor(String attrName) {
+		return this.extractorMap.get(attrName);
 	}
 	
 	public Collection<String> getTargets() {

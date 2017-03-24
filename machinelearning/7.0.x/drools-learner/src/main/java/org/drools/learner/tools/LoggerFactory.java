@@ -10,8 +10,8 @@ import java.util.HashMap;
 
 public class LoggerFactory {
 
-	private static StringWriter str_writer = new StringWriter();
-	private static BufferedWriter buffer = new BufferedWriter(str_writer);
+	private static StringWriter strWriter = new StringWriter();
+	private static BufferedWriter buffer = new BufferedWriter(strWriter);
 	private static HashMap<Class<?>, SimpleLogger> fileLoggers = new HashMap<Class<?>, SimpleLogger>();
 	
 	public static SimpleLogger getUniqueFileLogger(Class<?> klass, int level) {
@@ -39,23 +39,23 @@ public class LoggerFactory {
 		return null;
 	}
 
-	public static void dump_buffer(String file_sign, String directory) {
+	public static void dumpBuffer(String fileSign, String directory) {
 		// TODO Auto-generated method stub
 		
-		int last_slash = file_sign.lastIndexOf('/');
-		String file_name = file_sign.substring(0, last_slash+1) + directory+file_sign.substring(last_slash)+"."+directory;
-		System.out.println("file "+ file_name+ " logged ");
+		int lastSlash = fileSign.lastIndexOf('/');
+		String fileName = fileSign.substring(0, lastSlash+1) + directory+fileSign.substring(lastSlash)+"."+directory;
+		System.out.println("file "+ fileName+ " logged ");
 		
 		
 		PrintWriter writer;
 		try {
-			writer = new PrintWriter (new BufferedWriter (new FileWriter (file_name)));
+			writer = new PrintWriter (new BufferedWriter (new FileWriter (fileName)));
 			buffer.flush();
 //			System.out.println("LOG1: "+ str_writer.getBuffer());	
 //			System.out.println("LOG2: "+ str_writer.getBuffer().toString());
 
-			writer.write(str_writer.getBuffer().toString()); //str_buffer.getBuffer());
-			str_writer.close();
+			writer.write(strWriter.getBuffer().toString()); //str_buffer.getBuffer());
+			strWriter.close();
 			buffer.close();
 			writer.flush();
 			// Close the BufferedWriter object and the underlying
@@ -73,12 +73,12 @@ public class LoggerFactory {
 class SysOutLogger implements LoggerInterface {
 	private Class<?> klass;
 	private String msg;
-	public SysOutLogger(Class<?> _klass) {
-		klass = _klass;
+	public SysOutLogger(Class<?> klass) {
+		this.klass = klass;
 	}
 	
-	public void setMsg(String _msg) {
-		msg = _msg;
+	public void setMsg(String msg) {
+		this.msg = msg;
 	}
 	public void stat(String s) {
 		System.out.print(s);
@@ -96,9 +96,9 @@ class WriterLogger implements LoggerInterface {
 	private Writer writer;
 	private Class<?> klass;
 	private String msg;
-	public WriterLogger(Class<?> _klass, Writer w) {
-		writer = w;
-		klass = _klass;
+	public WriterLogger(Class<?> klass, Writer w) {
+		this.writer = w;
+		this.klass = klass;
 	}
 	public void stat(String s) {
 		try {

@@ -9,10 +9,10 @@ import org.drools.learner.eval.InstDistribution;
 
 public interface Heuristic {
 	
-	public void init(InstDistribution _insts_by_target);
+	public void init(InstDistribution instsByTarget);
 	
-	public double getEval(Domain attr_domain);
-	public double getEval_cont(Domain attr_domain);
+	public double getEval(Domain attrDomain);
+	public double getEvalCont(Domain attrDomain);
 	
 	public Domain getDomain();
 	public ArrayList<Instance> getSortedInstances();

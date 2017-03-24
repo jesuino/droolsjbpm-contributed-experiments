@@ -24,28 +24,28 @@ public class RulePrinter {
 	private static SimpleLogger flog = LoggerFactory.getUniqueFileLogger(RulePrinter.class, SimpleLogger.WARN);
 	private static SimpleLogger slog = LoggerFactory.getSysOutLogger(RulePrinter.class, SimpleLogger.DEBUG);
 	
-	public static Reader readRules(DecisionTree learned_dt) {
+	public static Reader readRules(DecisionTree learnedDt) {
 		
-		RulePrinter my_printer = new RulePrinter();	//bocuk.getNum_fact_trained()
-		my_printer.setBoundOnNumRules(Util.MAX_NUM_RULES);
-		my_printer.print(learned_dt, Util.SORT_RULES_BY_RANK);
+		RulePrinter myPrinter = new RulePrinter();	//bocuk.getNum_fact_trained()
+		myPrinter.setBoundOnNumRules(Util.MAX_NUM_RULES);
+		myPrinter.print(learnedDt, Util.SORT_RULES_BY_RANK);
 		
-		String all_rules = my_printer.write2string();
+		String allRules = myPrinter.write2string();
 		if (Util.PRINT_RULES) {
 			//my_printer.write2file("examples", "src/rules/examples/" + file);
-			my_printer.write2File(all_rules, false, Util.DRL_DIRECTORY+learned_dt.getSignature());
+			myPrinter.write2File(allRules, false, Util.DRL_DIRECTORY+learnedDt.getSignature());
 		}
 		
-		return new StringReader(all_rules);
+		return new StringReader(allRules);
 	}
 
-	private Class<?> rule_clazz;	
+	private Class<?> ruleClazz;	
 	
 	private DecisionTreeVisitor visitor;
 	private ArrayList<Rule> rules;
 	
-	private int bound_on_num_rules;
-	private double num_instances;
+	private int boundOnNumRules;
+	private double numInstances;
 
 	private HashMap<String, ArrayList<Field>> attrRelations;
 	private HashMap<String, Class<?>> importList;	// TODO init
@@ -61,35 +61,35 @@ public class RulePrinter {
 		this.rules = new ArrayList<Rule>();
 		//ruleText = new ArrayList<String>();
 		
-		this.bound_on_num_rules = -1;
-		this.num_instances = -1.0d;
+		this.boundOnNumRules = -1;
+		this.numInstances = -1.0d;
 	}
 	
 	public Class<?> getRuleClass() {
-		return rule_clazz;
+		return ruleClazz;
 	}
 	
 	public int getBoundOnNumRules() {
-		return bound_on_num_rules;
+		return boundOnNumRules;
 	}
 
-	public void setBoundOnNumRules(int max_num_rules) {
-		this.bound_on_num_rules = max_num_rules;
+	public void setBoundOnNumRules(int maxNumRules) {
+		this.boundOnNumRules = maxNumRules;
 	}
 	
 	public double getNumInstances() {
-		return this.num_instances;
+		return this.numInstances;
 	}
 
 	public void setNumInstances(int num) {
-		this.num_instances = num;
+		this.numInstances = num;
 	}
 	
 	public void print(DecisionTree dt, boolean sort) {//, PrintStream object
-		this.rule_clazz = dt.getObjClass();
+		this.ruleClazz = dt.getObjClass();
 		this.attrRelations = dt.getAttrRelationMap();
 		this.importList = new HashMap<String, Class<?>>();
-		this.num_instances = dt.getRoot().getNumMatch();
+		this.numInstances = dt.getRoot().getNumMatch();
 		
 		visitor.visit(dt);
 		rules.ensureCapacity(visitor.getNumPathsFound());
@@ -139,13 +139,13 @@ public class RulePrinter {
 			}
 //			} else {			}
 		}
-		NodeValue action_node = p.getAction();
-		ArrayList<Field> nodeRelations = attrRelations.get(action_node.getFReference());
+		NodeValue actionNode = p.getAction();
+		ArrayList<Field> nodeRelations = attrRelations.get(actionNode.getFReference());
 		if (nodeRelations == null || nodeRelations.isEmpty()) { 
 			// this a direct child add to reference to the main guy 
-			newRule.addActionToMain(action_node);
+			newRule.addActionToMain(actionNode);
 		} else {
-			newRule.processNodeValue(action_node, nodeRelations, newRule.getMainDeclaration(), 0, 2);	//int condition_or_action = action = 2	
+			newRule.processNodeValue(actionNode, nodeRelations, newRule.getMainDeclaration(), 0, 2);	//int condition_or_action = action = 2	
 		}
 		return newRule;	
 	}
@@ -202,14 +202,14 @@ public class RulePrinter {
 			//flog.error("RulePrinter write2string packageName="+packageName);
 		}
 	
-		int total_num_facts=0;
-		int i = 0, active_i = 0;
+		int totalNumFacts=0;
+		int i = 0, activeI = 0;
 		for( Rule rule: rules) {
 			i++;
 			//flog.debug("Rule: "+ i);
 			if (Util.ONLY_ACTIVE_RULES) {
 				if (rule.getRank() >= 0) {
-					active_i++;
+					activeI++;
 					bodyBuffer.append(rule.toString());
 					bodyBuffer.append("\n");
 					
@@ -218,18 +218,18 @@ public class RulePrinter {
 
 			} else {
 				if (rule.getRank() >= 0) {
-					active_i++;
+					activeI++;
 				}
 				bodyBuffer.append(rule.toString());
 				bodyBuffer.append("\n");
 				introBuffer.append(getImports(rule.getDeclarationIt()));
 			}
-			total_num_facts += rule.getNumClassifiedInstances();	
+			totalNumFacts += rule.getNumClassifiedInstances();	
 			if (this.getBoundOnNumRules()>0 && i >= this.getBoundOnNumRules())
 				break;
 		}
-		bodyBuffer.append("//THE END: Total number of facts correctly classified= "+ total_num_facts + " over "+ this.getNumInstances());
-		bodyBuffer.append("\n//with " + active_i + " number of rules over "+i+" total number of rules ");
+		bodyBuffer.append("//THE END: Total number of facts correctly classified= "+ totalNumFacts + " over "+ this.getNumInstances());
+		bodyBuffer.append("\n//with " + activeI + " number of rules over "+i+" total number of rules ");
 		bodyBuffer.append("\n"); // EOF
 		
 		
@@ -248,8 +248,8 @@ public class RulePrinter {
 			if (!importList.containsKey(name)) {
 				importList.put(name, dec.getDeclaringType());
 				//String import_name = dec.getDeclaringType().getName().replaceAll("$", ".");
-				String import_name = dec.getDeclaringType().getName().replace('$', '.');
-				importBuffer.append("import "+ import_name);
+				String importName = dec.getDeclaringType().getName().replace('$', '.');
+				importBuffer.append("import "+ importName);
 				importBuffer.append("\n"); 
 			}
 		}
@@ -259,102 +259,102 @@ public class RulePrinter {
 
 class Rule {
 	
-	private Class<?> main_obj;	// object class name
-	private ArrayList<Declaration> rule_decs;
+	private Class<?> mainObj;	// object class name
+	private ArrayList<Declaration> ruleDecs;
 	private ArrayList<AttrReference>  actions;
 	
 	// key: the reference of the declaration, => id of the declaration
 	private HashMap <String, Integer> declarationMap;
 	
-	private int num_declarations; 
+	private int numDeclarations; 
 	
 	private double rank;				 // matching ratio
-	private double num_classified_instances;// number of instances matching that rule
+	private double numClassifiedInstances;// number of instances matching that rule
 	
 	private int id;						 // unique id, need a unique name in the drl file
 //	private String referenceToMain = main_obj.getName()+"0";
-	private int main_obj_id = 0;
+	private int mainObjId = 0;
 	
 	Rule(Class<?> obj) {
-		num_declarations = 0;
-		rule_decs = new ArrayList<Declaration>(1); //new ArrayList<Declaration>(1);
+		numDeclarations = 0;
+		ruleDecs = new ArrayList<Declaration>(1); //new ArrayList<Declaration>(1);
 		declarationMap = new HashMap<String, Integer>(1);
-		main_obj= obj;
-		String obj_ref = getObjectClassName().toLowerCase();
-		declarationMap.put(obj_ref, num_declarations);
+		mainObj= obj;
+		String objRef = getObjectClassName().toLowerCase();
+		declarationMap.put(objRef, numDeclarations);
 		
-		rule_decs.add(new Declaration(main_obj, obj_ref, num_declarations));
+		ruleDecs.add(new Declaration(mainObj, objRef, numDeclarations));
 		actions = new ArrayList<AttrReference>(1);
 	}
 	
 	public Iterator<Declaration> getDeclarationIt() {
-		return rule_decs.iterator();
+		return ruleDecs.iterator();
 	}
 
 	public void addConditionToMain(NodeValue current) {
-		rule_decs.get(main_obj_id).addCondition(current);
+		ruleDecs.get(mainObjId).addCondition(current);
 	}
 	
 	public Declaration getMainDeclaration(){
-		return rule_decs.get(main_obj_id);
+		return ruleDecs.get(mainObjId);
 	}
 	public void addActionToMain(NodeValue current) {
 		AttrReference aRef = new AttrReference(current);	//D
-		rule_decs.get(main_obj_id).addActionReference(aRef);						//D
+		ruleDecs.get(mainObjId).addActionReference(aRef);						//D
 		addAction(aRef);									//D
 		setRuleStats(current);								//D
 	}
 	
-	public void addCondition(NodeValue current, ArrayList<Field> nodeRelations, int rel_id) {
-		if (rel_id == nodeRelations.size()) {	// it must be primitive
+	public void addCondition(NodeValue current, ArrayList<Field> nodeRelations, int relId) {
+		if (relId == nodeRelations.size()) {	// it must be primitive
 			Field referenceField = nodeRelations.get(nodeRelations.size()-1);			
 			String referenceOfCondition = Util.getDecReference(referenceField);
 			
 			//System.out.println("It is primitive, should add a condition to its father "+referenceOfCondition+ " rel_id "+ rel_id + " size "+ (nodeRelations.size()-1)+ " \n");	
-			Declaration dec = rule_decs.get(declarationMap.get(referenceOfCondition));
+			Declaration dec = ruleDecs.get(declarationMap.get(referenceOfCondition));
 			dec.addCondition(current);					//D
 		} else {
-			Field referenceField = nodeRelations.get(rel_id);			
+			Field referenceField = nodeRelations.get(relId);			
 			String referenceOfCondition = Util.getDecReference(referenceField);
 			//System.out.println("referenceOfCondition " +referenceOfCondition + " rel_id "+ rel_id + " size "+ (nodeRelations.size()-1));
-			Declaration the_place_declared = null;
+			Declaration thePlaceDeclared = null;
 			
-			if (rel_id ==0 ) {
+			if (relId ==0 ) {
 				
-				the_place_declared = rule_decs.get(0);
+				thePlaceDeclared = ruleDecs.get(0);
 				//System.out.println("The first guy "+referenceField.getName()+" to main declaration (ref?)"+ " rel_id "+ rel_id + " size "+ (nodeRelations.size()-1)+ " \n");	
 				
 			} else {
-				the_place_declared = rule_decs.get(rel_id-1);//declarationMap.get(referenceOfCondition));
+				thePlaceDeclared = ruleDecs.get(relId-1);//declarationMap.get(referenceOfCondition));
 				//System.out.println("Continue"+referenceField.getName()+" in "+the_place_declared+ "??? rel_id "+ rel_id + " size "+ (nodeRelations.size()-1)+ " \n");	
 
 			}
-			if (!the_place_declared.hasReference(referenceField.getName())) {
-				num_declarations++;
-				Declaration new_dec = new Declaration(referenceField.getType(), referenceField.getName(), num_declarations);
+			if (!thePlaceDeclared.hasReference(referenceField.getName())) {
+				numDeclarations++;
+				Declaration newDec = new Declaration(referenceField.getType(), referenceField.getName(), numDeclarations);
 				//System.out.println("Create new dec "+referenceOfCondition+" (Main declaration doesnot have a ref"+ referenceField.getName() + ") rel_id "+ rel_id + " size "+ (nodeRelations.size()-1)+ " \n");	
 				
-				the_place_declared.addReference(new_dec);					//D
-				declarationMap.put(referenceOfCondition, num_declarations);
-				rule_decs.add(new_dec);
+				thePlaceDeclared.addReference(newDec);					//D
+				declarationMap.put(referenceOfCondition, numDeclarations);
+				ruleDecs.add(newDec);
 			}
 			
-			addCondition(current, nodeRelations, rel_id+1);
+			addCondition(current, nodeRelations, relId+1);
 			
 			
 			
 		}
 	}
 	// first time: the_place_declared = rule_decs.get(0)
-	public void processNodeValue(NodeValue current, ArrayList<Field> nodeRelations, Declaration the_place_declared, int rel_id, int condition_or_action) {
-		if (rel_id == nodeRelations.size()) {	// it must be primitive
+	public void processNodeValue(NodeValue current, ArrayList<Field> nodeRelations, Declaration thePlaceDeclared, int relId, int conditionOrAction) {
+		if (relId == nodeRelations.size()) {	// it must be primitive
 			Field referenceField = nodeRelations.get(nodeRelations.size()-1);			
 			String referenceOfCondition = Util.getDecReference(referenceField);
 			
 			//System.out.println("It is primitive, should add a condition to its father "+referenceOfCondition+ " rel_id "+ rel_id + " size "+ (nodeRelations.size()-1)+ " \n");	
-			Declaration dec = rule_decs.get(declarationMap.get(referenceOfCondition));
+			Declaration dec = ruleDecs.get(declarationMap.get(referenceOfCondition));
 			
-			switch (condition_or_action) {
+			switch (conditionOrAction) {
 			case 1: // condition
 				dec.addCondition(current);					//D
 				break;
@@ -368,33 +368,33 @@ class Rule {
 			return;
 
 		} else {
-			Field referenceField = nodeRelations.get(rel_id);			
+			Field referenceField = nodeRelations.get(relId);			
 			String referenceOfCondition = Util.getDecReference(referenceField);
 			
 			//Reference current_ref = the_place_declared.getReference(referenceField.getName());
-			Declaration current_dec = null;
-			if (!the_place_declared.hasReference(referenceField.getName())) {
+			Declaration currentDec = null;
+			if (!thePlaceDeclared.hasReference(referenceField.getName())) {
 			//if (current_ref == null) {
-				num_declarations++;
-				current_dec = new Declaration(referenceField.getType(), referenceField.getName(), num_declarations);
+				numDeclarations++;
+				currentDec = new Declaration(referenceField.getType(), referenceField.getName(), numDeclarations);
 				//System.out.println("Create new dec "+referenceOfCondition+" (Main declaration doesnot have a ref"+ referenceField.getName() + ") rel_id "+ rel_id + " size "+ (nodeRelations.size()-1)+ " \n");	
-				switch (condition_or_action) {
+				switch (conditionOrAction) {
 				case 1: // condition
-					the_place_declared.addReference(current_dec);			//D
+					thePlaceDeclared.addReference(currentDec);			//D
 					break;
 				case 2: // action
 					AttrReference aRef = new AttrReference(current);	//D
-					the_place_declared.addActionReference(aRef);		//D
+					thePlaceDeclared.addActionReference(aRef);		//D
 					break;
 				}
-				declarationMap.put(referenceOfCondition, num_declarations);
-				rule_decs.add(current_dec);
+				declarationMap.put(referenceOfCondition, numDeclarations);
+				ruleDecs.add(currentDec);
 			} else {
 				//current_dec = the_place_declared.getReference(referenceField.getName()).
-				current_dec = the_place_declared.getReferenceDec(referenceField.getName());
+				currentDec = thePlaceDeclared.getReferenceDec(referenceField.getName());
 			}
 			
-			processNodeValue(current, nodeRelations, current_dec, rel_id+1, condition_or_action);	
+			processNodeValue(current, nodeRelations, currentDec, relId+1, conditionOrAction);	
 			
 		}
 	}
@@ -409,7 +409,7 @@ class Rule {
 	}
 	
 	public String getObjectClassName() {
-		return main_obj.getSimpleName();
+		return mainObj.getSimpleName();
 	}
 	
 	private int getId() {
@@ -421,10 +421,10 @@ class Rule {
 	}
 	
 	private void setNumClassifiedInstances(double dataSize) {
-		this.num_classified_instances = dataSize;	
+		this.numClassifiedInstances = dataSize;	
 	}
 	public double getNumClassifiedInstances() {
-		return this.num_classified_instances;	
+		return this.numClassifiedInstances;	
 	}
 
 	public void setRank(double r) {
@@ -456,48 +456,48 @@ class Rule {
 		end
 		 */
 		//"rule \"#"+getId()+" "+decision+" rank:"+rank+"\" \n";
-		StringBuffer sb_out = new StringBuffer("");
+		StringBuffer sbOut = new StringBuffer("");
 		
-		sb_out.append("\t when");
-		for (int dec_i =rule_decs.size()-1; dec_i>=0; dec_i--) {
-			Declaration d = rule_decs.get(dec_i);
-			String obj_ref = d.getSymbol(); //"$"+this.getObjectClassName().substring(0, 1).toLowerCase();
-			sb_out.append("\n\t\t "+obj_ref+" : "+d.getDeclaringTypeName()+"("+ "");
-			Iterator<NodeValue> dec_it = d.getConditionIt();
-			while (dec_it.hasNext()) {
-				NodeValue cond = dec_it.next();
-				sb_out.append(cond.toString() + ", ");
+		sbOut.append("\t when");
+		for (int decI =ruleDecs.size()-1; decI>=0; decI--) {
+			Declaration d = ruleDecs.get(decI);
+			String objRef = d.getSymbol(); //"$"+this.getObjectClassName().substring(0, 1).toLowerCase();
+			sbOut.append("\n\t\t "+objRef+" : "+d.getDeclaringTypeName()+"("+ "");
+			Iterator<NodeValue> decIt = d.getConditionIt();
+			while (decIt.hasNext()) {
+				NodeValue cond = decIt.next();
+				sbOut.append(cond.toString() + ", ");
 			}
 			
-			Iterator<Reference> ref_it = d.getReferenceIt();
-			while (ref_it.hasNext()) {
-				Reference ref = ref_it.next();
-				sb_out.append(ref.toString() + ", ");
+			Iterator<Reference> refIt = d.getReferenceIt();
+			while (refIt.hasNext()) {
+				Reference ref = refIt.next();
+				sbOut.append(ref.toString() + ", ");
 			}			
-			sb_out.delete(sb_out.length()-2, sb_out.length()-1);
-			sb_out.append(")");
+			sbOut.delete(sbOut.length()-2, sbOut.length()-1);
+			sbOut.append(")");
 		}
-		sb_out.append("\n");
-		StringBuffer sb_action = new StringBuffer("");
-		StringBuffer sb_field = new StringBuffer("");
-		StringBuffer sb_expected_value = new StringBuffer("");
+		sbOut.append("\n");
+		StringBuffer sbAction = new StringBuffer("");
+		StringBuffer sbField = new StringBuffer("");
+		StringBuffer sbExpectedValue = new StringBuffer("");
 		for (AttrReference act: actions) {
-			sb_action.append(act.getValue() + " , ");
-			sb_expected_value.append(act.getVariableName()); 
-			sb_field.append(act.getFName() + "");
+			sbAction.append(act.getValue() + " , ");
+			sbExpectedValue.append(act.getVariableName()); 
+			sbField.append(act.getFName() + "");
 			
 		}
-		sb_action.delete(sb_action.length()-3, sb_action.length()-1);
+		sbAction.delete(sbAction.length()-3, sbAction.length()-1);
 		
-		sb_out.append("\t then ");
-		sb_out.append("\n\t\t System.out.println(\"["+sb_field.toString()+ "] Expected value (\" + "+  sb_expected_value.toString()+ " + \"), Classified as ("+sb_action.toString()+")\");\n"); 
+		sbOut.append("\t then ");
+		sbOut.append("\n\t\t System.out.println(\"["+sbField.toString()+ "] Expected value (\" + "+  sbExpectedValue.toString()+ " + \"), Classified as ("+sbAction.toString()+")\");\n"); 
 		if (getRank() <0)
-			sb_out.append("\n\t\t System.out.println(\"But no matching fact found = DOES not fire on\");\n");
+			sbOut.append("\n\t\t System.out.println(\"But no matching fact found = DOES not fire on\");\n");
 		
-		sb_out.insert(0, "rule \"#"+getId()+" "+sb_field.toString()+ "= "+sb_action.toString()+" classifying "+this.getNumClassifiedInstances()+" num of facts with rank:"+getRank() +"\" \n");
-		sb_out.append("end\n");
+		sbOut.insert(0, "rule \"#"+getId()+" "+sbField.toString()+ "= "+sbAction.toString()+" classifying "+this.getNumClassifiedInstances()+" num of facts with rank:"+getRank() +"\" \n");
+		sbOut.append("end\n");
 
-		return sb_out.toString();
+		return sbOut.toString();
 	}
 
 	public static Comparator<Rule> getRankComparator() {
@@ -520,29 +520,29 @@ class Rule {
 
 class Declaration{
 	private int id; 
-	private String dec_ref; 		
-	private Class<?> declared_obj;	// object class name
+	private String decRef; 		
+	private Class<?> declaredObj;	// object class name
 //	private ArrayList<RuleNode> conditions;
 	private ArrayList<NodeValue> conditions;
 	private ArrayList<Reference> references;
 	
-	public Declaration(Class<?> obj_class, String name, int dec_id) {
-		id = dec_id;
-		declared_obj = obj_class;
-		dec_ref = name;
+	public Declaration(Class<?> objClass, String name, int decId) {
+		id = decId;
+		declaredObj = objClass;
+		decRef = name;
 		references = new ArrayList<Reference>();
 		conditions = new ArrayList<NodeValue>();
 	}
 	
 	public String getDeclaringFName() {
-		return dec_ref;
+		return decRef;
 	}
 	
 	public Class<?> getDeclaringType() {
-		return declared_obj;
+		return declaredObj;
 	}
 	public String getDeclaringTypeName() {
-		return declared_obj.getSimpleName();
+		return declaredObj.getSimpleName();
 	}
 
 	public void addCondition(NodeValue current) {
@@ -598,7 +598,7 @@ class Declaration{
 	}
 	
 	public String getSymbol() {
-		return "$"+dec_ref + "_" + id;
+		return "$"+decRef + "_" + id;
 	}
 	
 }
@@ -623,8 +623,8 @@ class DecReference implements Reference {
 	public String getFName() {
 		return fName;
 	}
-	public void setReference(Declaration _toReference) {
-		toReference = _toReference;
+	public void setReference(Declaration toReference) {
+		this.toReference = toReference;
 	}
 	
 	
@@ -636,25 +636,25 @@ class DecReference implements Reference {
 class AttrReference implements Reference {
 	
 	private String fName;
-	private NodeValue real_value;
+	private NodeValue realValue;
 	
 	public AttrReference (NodeValue v) {
-		String _fName = v.getFName();
+		String fName = v.getFName();
 		if (v.getNode().getDomain().isArtificial()) {
-			_fName = Util.getFieldName(_fName);
+			fName = Util.getFieldName(fName);
 		}
-		fName = _fName;
+		this.fName = fName;
 		/* TODO is the copying really necessary?
 		real_value = new NodeValue(v.getNode());
 		real_value.setNodeValue(v.getNodeValue());
 		*/
-		real_value = v;
+		realValue = v;
 	}
 	public Object getVariableName() {
 		return "$target_label";
 	}
 	public Object getValue() {
-		return real_value.getValue();
+		return realValue.getValue();
 	}
 	public String getFName() {
 		return fName;

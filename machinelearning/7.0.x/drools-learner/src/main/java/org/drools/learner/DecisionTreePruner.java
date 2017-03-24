@@ -26,33 +26,33 @@ public class DecisionTreePruner {
 	
 	
 //	private double best_error;
-	private Solution best_solution;
-	private ArrayList<Solution> pruned_sol;
+	private Solution bestSolution;
+	private ArrayList<Solution> prunedSol;
 	
 	
-	private PrunerStats best_stats_everfound;
+	private PrunerStats bestStatsEverFound;
 
 	public DecisionTreePruner() {
 //		best_error = 1.0;
 
-		best_stats_everfound = new PrunerStats(1.0);//proc.getAlphaEstimate());
-		pruned_sol = new ArrayList<Solution>();
+		bestStatsEverFound = new PrunerStats(1.0);//proc.getAlphaEstimate());
+		prunedSol = new ArrayList<Solution>();
 	}
 	public Solution getBestSolution() {
-		return best_solution;
+		return bestSolution;
 		
 	}
-	public void prun_to_estimate(SolutionSet sol_set) {			
+	public void prunToEstimate(SolutionSet solSet) {			
 		/*
 		 * The best tree is selected from this series of trees with the classification error not exceeding 
 		 * 	an expected error rate on some test set (cross-validation error), 
 		 * which is done at the second stage.
 		 */
 		int i =0;
-		for (Solution sol: sol_set.getSolutions()) {
-			boolean updated = this.prun_to_estimate(sol);
+		for (Solution sol: solSet.getSolutions()) {
+			boolean updated = this.prunToEstimate(sol);
 			if (updated) {
-				sol_set.setBestSolutionId(i);
+				solSet.setBestSolutionId(i);
 			}
 		}
 		
@@ -61,7 +61,7 @@ public class DecisionTreePruner {
 		
 	}
 	
-	public boolean prun_to_estimate(Solution sol) {			
+	public boolean prunToEstimate(Solution sol) {			
 		/*
 		 * The best tree is selected from this series of trees with the classification error not exceeding 
 		 * 	an expected error rate on some test set (cross-validation error), 
@@ -69,71 +69,71 @@ public class DecisionTreePruner {
 		 */
 		
 		DecisionTree dt = sol.getTree();
-		dt.calc_num_node_leaves(dt.getRoot());
+		dt.calcNumNodeLeaves(dt.getRoot());
 		
 
 		double epsilon = EPSILON * numExtraMisClassIfPrun(dt.getRoot());
-		MinAlphaProc alpha_proc = new MinAlphaProc(INIT_ALPHA, epsilon);
-		TreeSequenceProc search = new TreeSequenceProc(sol, alpha_proc);//INIT_ALPHA
+		MinAlphaProc alphaProc = new MinAlphaProc(INIT_ALPHA, epsilon);
+		TreeSequenceProc search = new TreeSequenceProc(sol, alphaProc);//INIT_ALPHA
 
-		search.init_tree();	// alpha_1 = 0.0 
-		search.iterate_trees(1);
+		search.initTree();	// alpha_1 = 0.0 
+		search.iterateTrees(1);
 		
 //		updates.add(search.getTreeSequence());
 //		equence_stats.add(search.getTreeSequenceStats());
 //		alpha_procs.add(alpha_proc);
 
-		boolean better_found = false;
+		boolean betterFound = false;
 
 		int sid = 0;
-		int best_id = 0;
+		int bestId = 0;
 //		double best_error = 1.0d;
 		System.out.println("Tree id\t Num_leaves\t Cross-validated\t Resubstitution\t Alpha\t");
-		ArrayList<PrunerStats> trees = search._getTreeSequenceStats();
+		ArrayList<PrunerStats> trees = search.getTreeSequenceStats();
 		for (PrunerStats st: trees ){
-			if (st.getErrorEstimation() < best_stats_everfound.getErrorEstimation() ||
-			   (st.getErrorEstimation() == best_stats_everfound.getErrorEstimation() && 
-				st.getNum_terminal_nodes() < best_stats_everfound.getNum_terminal_nodes())) {
-				best_stats_everfound.iteration_id(st.iteration_id());
-				best_stats_everfound.setErrorEstimation(st.getErrorEstimation());
-				best_stats_everfound.setTrainError(st.getTrainError());
-				best_stats_everfound.setNum_terminal_nodes(st.getNum_terminal_nodes());
-				best_stats_everfound.setAlpha(st.getAlpha());
-				best_id = sid;
+			if (st.getErrorEstimation() < bestStatsEverFound.getErrorEstimation() ||
+			   (st.getErrorEstimation() == bestStatsEverFound.getErrorEstimation() && 
+				st.getNumTerminalNodes() < bestStatsEverFound.getNumTerminalNodes())) {
+				bestStatsEverFound.iterationId(st.iterationId());
+				bestStatsEverFound.setErrorEstimation(st.getErrorEstimation());
+				bestStatsEverFound.setTrainError(st.getTrainError());
+				bestStatsEverFound.setNumTerminalNodes(st.getNumTerminalNodes());
+				bestStatsEverFound.setAlpha(st.getAlpha());
+				bestId = sid;
 //				best_st = st.iteration_id();
-				better_found = true;
+				betterFound = true;
 			} else {
 				
 			}
-			System.out.println(sid+ "\t " +st.getNum_terminal_nodes()+ "\t "+ 100.0d*st.getErrorEstimation() + "\t "+  100.0d*st.getTrainError()+ "\t "+ st.getAlpha() );
+			System.out.println(sid+ "\t " +st.getNumTerminalNodes()+ "\t "+ 100.0d*st.getErrorEstimation() + "\t "+  100.0d*st.getTrainError()+ "\t "+ st.getAlpha() );
 			sid++;				
 		}
-		System.out.println("BEST "+best_id+ "\t " +trees.get(best_id).getNum_terminal_nodes()+ "\t "+ trees.get(best_id).getErrorEstimation() + "\t "+  trees.get(best_id).getTrainError() + "\t "+ trees.get(best_id).getAlpha() );
+		System.out.println("BEST "+bestId+ "\t " +trees.get(bestId).getNumTerminalNodes()+ "\t "+ trees.get(bestId).getErrorEstimation() + "\t "+  trees.get(bestId).getTrainError() + "\t "+ trees.get(bestId).getAlpha() );
 		
 		//System.exit(0);
 		
 		int N = dt.getTestingDataSize();// procedure.getTestDataSize(dt_i);
-		double standart_error_estimate = Math.sqrt((trees.get(best_id).getErrorEstimation() * (1- trees.get(best_id).getErrorEstimation())/ (double)N));
+		double standartErrorEstimate = Math.sqrt((trees.get(bestId).getErrorEstimation() * (1- trees.get(bestId).getErrorEstimation())/ (double)N));
 
-		if (better_found) {
-			for (int i = search.tree_sequence.size()-1; i>0; i--) {
+		if (betterFound) {
+			for (int i = search.treeSequence.size()-1; i>0; i--) {
 
-				NodeUpdate nu = search.tree_sequence.get(i);
-				System.out.println(nu.iteration_id +">"+ best_stats_everfound.iteration_id());
-				if (nu.iteration_id > best_stats_everfound.iteration_id() ) {
-					search.add_back(nu.node_update, nu.old_node);
-					SingleTreeTester t = new SingleTreeTester(search.tree_sol.getTree());
-					Stats train = t.test(search.tree_sol.getList());
-					Stats test = t.test(search.tree_sol.getTestList());
-					int num_leaves = search.tree_sol.getTree().getRoot().getNumLeaves();
+				NodeUpdate nu = search.treeSequence.get(i);
+				System.out.println(nu.iterationId +">"+ bestStatsEverFound.iterationId());
+				if (nu.iterationId > bestStatsEverFound.iterationId() ) {
+					search.addBack(nu.nodeUpdate, nu.oldNode);
+					SingleTreeTester t = new SingleTreeTester(search.treeSol.getTree());
+					Stats train = t.test(search.treeSol.getList());
+					Stats test = t.test(search.treeSol.getTestList());
+					int numLeaves = search.treeSol.getTree().getRoot().getNumLeaves();
 
-					System.out.println("Back "+ i+ "\t " +num_leaves+ "\t "+ test.getResult(Stats.INCORRECT)/(double)test.getTotal() + "\t "+  train.getResult(Stats.INCORRECT)/(double)train.getTotal()+ "\t ");
+					System.out.println("Back "+ i+ "\t " +numLeaves+ "\t "+ test.getResult(Stats.INCORRECT)/(double)test.getTotal() + "\t "+  train.getResult(Stats.INCORRECT)/(double)train.getTotal()+ "\t ");
 				} else {
 					break;
 				}
 			}
 			
-			best_solution = search.tree_sol;
+			bestSolution = search.treeSol;
 			return true;
 		}
 		return false;
@@ -142,19 +142,19 @@ public class DecisionTreePruner {
 	}
 
 	
-	public void prun_tree(Solution sol) {
+	public void prunTree(Solution sol) {
 		double epsilon = 0.0000001 * numExtraMisClassIfPrun(sol.getTree().getRoot());
-		TreeSequenceProc search = new TreeSequenceProc(sol, new AnAlphaProc(best_stats_everfound.getAlpha(), epsilon));
-		search.iterate_trees(0);
+		TreeSequenceProc search = new TreeSequenceProc(sol, new AnAlphaProc(bestStatsEverFound.getAlpha(), epsilon));
+		search.iterateTrees(0);
 		//search.getTreeSequence()// to go back
 		
 	}
 
-	private void updateLeaves(TreeNode my_node, int i) {
-		my_node.setNumLeaves(my_node.getNumLeaves() + i);
-		TreeNode father_node = my_node.getFather();
-		if (father_node !=null)
-			updateLeaves(father_node, i);
+	private void updateLeaves(TreeNode myNode, int i) {
+		myNode.setNumLeaves(myNode.getNumLeaves() + i);
+		TreeNode fatherNode = myNode.getFather();
+		if (fatherNode !=null)
+			updateLeaves(fatherNode, i);
 		
 	}
 	
@@ -165,27 +165,27 @@ public class DecisionTreePruner {
 		return (int) (t.getNumMatch() - t.getNumLabeled());
 	}
 	
-	private int numExtraMisClassIfPrun(TreeNode my_node) {
-		int num_misclassified = R(my_node); // needs to be cast because of
+	private int numExtraMisClassIfPrun(TreeNode myNode) {
+		int numMisclassified = R(myNode); // needs to be cast because of
 
 		if (slog.debug() !=null)
-			slog.debug().log(":numExtraMisClassIfPrun:num_misclassified "+ num_misclassified);
+			slog.debug().log(":numExtraMisClassIfPrun:num_misclassified "+ numMisclassified);
 		
-		int kids_misclassified = 0;
-		for(Object key: my_node.getChildrenKeys()) {
-			TreeNode child = my_node.getChild(key);
-			kids_misclassified += child.getMissClassified();
+		int kidsMisclassified = 0;
+		for(Object key: myNode.getChildrenKeys()) {
+			TreeNode child = myNode.getChild(key);
+			kidsMisclassified += child.getMissClassified();
 			if (slog.debug() !=null)
-				slog.debug().log(" kid="+ kids_misclassified );
+				slog.debug().log(" kid="+ kidsMisclassified );
 		}
 		if (slog.debug() !=null)
 			slog.debug().log("\n");
-		if (num_misclassified < kids_misclassified) {
+		if (numMisclassified < kidsMisclassified) {
 			System.out.println("Problem ++++++");
 			//System.exit(0);
 			return 0;
 		}
-		return num_misclassified - kids_misclassified;
+		return numMisclassified - kidsMisclassified;
 	}
 	
 	
@@ -193,32 +193,32 @@ public class DecisionTreePruner {
 		
 		private static final double MAX_ERROR_RATIO = 0.99;
 	
-		private Solution tree_sol;
+		private Solution treeSol;
 		//private double the_alpha;
-		private AlphaSelectionProc alpha_proc;
-		private ArrayList<NodeUpdate> tree_sequence;
+		private AlphaSelectionProc alphaProc;
+		private ArrayList<NodeUpdate> treeSequence;
 //		private ArrayList<PrunerStats> tree_sequence_stats;
-		private ArrayList<PrunerStats> _tree_sequence_stats;
+		private ArrayList<PrunerStats> treeSequenceStats;
 		
-		private PrunerStats best_tree_stats;
+		private PrunerStats bestTreeStats;
 		public TreeSequenceProc(Solution sol, AlphaSelectionProc cond) { //, double init_alpha
-			tree_sol = sol;
+			treeSol = sol;
 			
 			
-			alpha_proc = cond;
-			tree_sequence = new ArrayList<NodeUpdate>();
+			alphaProc = cond;
+			treeSequence = new ArrayList<NodeUpdate>();
 //			tree_sequence_stats = new ArrayList<PrunerStats>();
-			_tree_sequence_stats = new ArrayList<PrunerStats>();
+			treeSequenceStats = new ArrayList<PrunerStats>();
 			
-			best_tree_stats = new PrunerStats(10000000.0d);
-			
-			
-			System.out.println("From solution:"+tree_sol.getTestError()+ " "+ tree_sol.getTrainError() + " " +tree_sol.getTree().getRoot().getNumLeaves());
-			System.out.println("From tree:"+tree_sol.getTree().getTestError()+ " "+ tree_sol.getTree().getTrainError() + " " +tree_sol.getTree().getRoot().getNumLeaves());
+			bestTreeStats = new PrunerStats(10000000.0d);
 			
 			
-			NodeUpdate init_tree = new NodeUpdate(tree_sol.getTestError());
-			tree_sequence.add(init_tree);
+			System.out.println("From solution:"+treeSol.getTestError()+ " "+ treeSol.getTrainError() + " " +treeSol.getTree().getRoot().getNumLeaves());
+			System.out.println("From tree:"+treeSol.getTree().getTestError()+ " "+ treeSol.getTree().getTrainError() + " " +treeSol.getTree().getRoot().getNumLeaves());
+			
+			
+			NodeUpdate initTree = new NodeUpdate(treeSol.getTestError());
+			treeSequence.add(initTree);
 			
 //			PrunerStats init_tree_stats = new PrunerStats(tree_sol.getTree().getStats());
 //			init_tree_stats.setNum_terminal_nodes(tree_sol.getTree().getRoot().getNumLeaves());		
@@ -226,116 +226,116 @@ public class DecisionTreePruner {
 //			init_tree_stats.setCost_complexity(-1);	// dont known
 //			tree_sequence_stats.add(init_tree_stats);
 			
-			PrunerStats _init_tree_stats = new PrunerStats(tree_sol.getTrainError(), tree_sol.getTestError());
-			_init_tree_stats.setNum_terminal_nodes(tree_sol.getTree().getRoot().getNumLeaves());		
-			_init_tree_stats.setAlpha(0.0d);	// dont know
-			_init_tree_stats.setCost_complexity(-1);	// dont known
-			_tree_sequence_stats.add(_init_tree_stats);
+			PrunerStats initTreeStats = new PrunerStats(treeSol.getTrainError(), treeSol.getTestError());
+			initTreeStats.setNumTerminalNodes(treeSol.getTree().getRoot().getNumLeaves());		
+			initTreeStats.setAlpha(0.0d);	// dont know
+			initTreeStats.setCostComplexity(-1);	// dont known
+			treeSequenceStats.add(initTreeStats);
 			
 		}
 		public DecisionTree getFocusTree() {
-			return tree_sol.getTree();
+			return treeSol.getTree();
 		}
 		
 //		public ArrayList<PrunerStats> getTreeSequenceStats() {
 //			return tree_sequence_stats;
 //		}
 		
-		public ArrayList<PrunerStats> _getTreeSequenceStats() {
-			return _tree_sequence_stats;
+		public ArrayList<PrunerStats> getTreeSequenceStats() {
+			return treeSequenceStats;
 		}
 
 		public ArrayList<NodeUpdate> getTreeSequence() {
-			return tree_sequence;
+			return treeSequence;
 		}
 
-		private void init_tree() {
+		private void initTree() {
 			// initialize the tree to be prunned
 			// T_1 is the smallest subtree of T_max satisfying R(T_1) = R(T_max)
 			
-			ArrayList<TreeNode> last_nonterminals = tree_sol.getTree().getAnchestor_of_Leaves(tree_sol.getTree().getRoot());
+			ArrayList<TreeNode> lastNonterminals = treeSol.getTree().getAnchestorOfLeaves(treeSol.getTree().getRoot());
 			
 			// R(t) <= sum R(t_children) by the proposition 2.14, R(t) node miss-classification cost
 			// if R(t) = sum R(t_children) then prune off t_children
 			
-			boolean tree_changed = false; // (k)
-			for (TreeNode t: last_nonterminals) {
+			boolean treeChanged = false; // (k)
+			for (TreeNode t: lastNonterminals) {
 				if (numExtraMisClassIfPrun(t) == 0) {
 					// prune off the candidate node
-					tree_changed = true;
-					prune_off(t, 0);
+					treeChanged = true;
+					pruneOff(t, 0);
 				} 
 				
 			}
-			if (tree_changed) {
+			if (treeChanged) {
 				PrunerStats stats = new PrunerStats();
-				stats.iteration_id(0);
+				stats.iterationId(0);
 				//update_tree_stats(stats, 0.0d, 0); // error_estimation = stats.getCostEstimation() for the set (cross_validation or test error)
-				_update_tree_stats(stats, 0.0d, 0);
+				updateTreeStats(stats, 0.0d, 0);
 //			tree_sequence_stats.add(stats);
 			}
 		}
 		
-		private void iterate_trees(int i) {
+		private void iterateTrees(int i) {
 			if (slog.debug() !=null)
-				slog.debug().log(tree_sol.getTree().toString() +"\n");
+				slog.debug().log(treeSol.getTree().toString() +"\n");
 			// if number of non-terminal nodes in the tree is more than 1 
 			// = if there exists at least one non-terminal node different than root
-			if (tree_sol.getTree().getNumNonTerminalNodes() < 1) {
+			if (treeSol.getTree().getNumNonTerminalNodes() < 1) {
 				if (slog.debug() !=null)
-					slog.debug().log(":sequence_trees:TERMINATE-There is no non-terminal nodes? " + tree_sol.getTree().getNumNonTerminalNodes() +"\n");
+					slog.debug().log(":sequence_trees:TERMINATE-There is no non-terminal nodes? " + treeSol.getTree().getNumNonTerminalNodes() +"\n");
 				return; 
-			} else if (tree_sol.getTree().getNumNonTerminalNodes() == 1 && tree_sol.getTree().getRoot().getNumLeaves()<=1) {
+			} else if (treeSol.getTree().getNumNonTerminalNodes() == 1 && treeSol.getTree().getRoot().getNumLeaves()<=1) {
 				if (slog.debug() !=null)
-					slog.debug().log(":sequence_trees:TERMINATE-There is only one node left which is root node " + tree_sol.getTree().getNumNonTerminalNodes()+ " and it has only one leaf (pruned)" +tree_sol.getTree().getRoot().getNumLeaves()+"\n");
+					slog.debug().log(":sequence_trees:TERMINATE-There is only one node left which is root node " + treeSol.getTree().getNumNonTerminalNodes()+ " and it has only one leaf (pruned)" +treeSol.getTree().getRoot().getNumLeaves()+"\n");
 				return; 
 			}
 			// for each non-leaf subtree
-			ArrayList<TreeNode> candidate_nodes = new ArrayList<TreeNode>();
+			ArrayList<TreeNode> candidateNodes = new ArrayList<TreeNode>();
 			// to find all candidates with min_alpha value
 			//TreeSequenceProc search = new TreeSequenceProc(the_alpha, alpha_proc);//100000.0d, new MinAlphaProc()); 
 			
 			
-			find_candidate_nodes(tree_sol.getTree().getRoot(), candidate_nodes);
+			findCandidateNodes(treeSol.getTree().getRoot(), candidateNodes);
 			//double min_alpha = search.getTheAlpha();
-			double min_alpha = getTheAlpha();
-			System.out.println("!!!!!!!!!!! dt:"+tree_sol.getTree().getId()+" ite "+i+" alpha: "+min_alpha + " num_nodes_found "+candidate_nodes.size());
+			double minAlpha = getTheAlpha();
+			System.out.println("!!!!!!!!!!! dt:"+treeSol.getTree().getId()+" ite "+i+" alpha: "+minAlpha + " num_nodes_found "+candidateNodes.size());
 			
-			if (candidate_nodes.size() >0) {
+			if (candidateNodes.size() >0) {
 				// The one or more subtrees with that value of will be replaced by leaves
 				// instead of getting the first node, have to process all nodes and prune all
 				// write a method to prune all
 				//TreeNode best_node = candidate_nodes.get(0);
 				
 				
-				int change_in_training_misclass = 0; // (k)
-				for (TreeNode candidate_node:candidate_nodes) {
+				int changeInTrainingMisclass = 0; // (k)
+				for (TreeNode candidateNode:candidateNodes) {
 					// prune off the candidate node
-					prune_off(candidate_node, i);
-					change_in_training_misclass += numExtraMisClassIfPrun(candidate_node); // extra misclassified guys
+					pruneOff(candidateNode, i);
+					changeInTrainingMisclass += numExtraMisClassIfPrun(candidateNode); // extra misclassified guys
 				
 				}
 //				PrunerStats stats = new PrunerStats();
 //				stats.iteration_id(i); 
 //				update_tree_stats(stats, min_alpha, change_in_training_misclass); // error_estimation = stats.getCostEstimation() for the set (cross_validation or test error)
 				PrunerStats stats = new PrunerStats();
-				stats.iteration_id(i); 
-				_update_tree_stats(stats, min_alpha, change_in_training_misclass);
+				stats.iterationId(i); 
+				updateTreeStats(stats, minAlpha, changeInTrainingMisclass);
 //				if (slog.debug() !=null)
 //					slog.debug().log(":sequence_trees:error "+ stats.getCostEstimation() +"<?"+ procedure.getErrorEstimate() * 1.6 +"\n");
 
 				if (stats.getErrorEstimation() < MAX_ERROR_RATIO) { //procedure.getValidationErrorEstimate() * 1.6) {
 					// if the error of the tree is not that bad
 					
-					if (stats.getErrorEstimation() < best_tree_stats.getErrorEstimation()) {
-						best_tree_stats = stats;
+					if (stats.getErrorEstimation() < bestTreeStats.getErrorEstimation()) {
+						bestTreeStats = stats;
 						if (slog.debug() !=null)
 							slog.debug().log(":sequence_trees:best node updated \n");
 			
 					}
 					//	TODO update alpha_proc by increasing the min_alpha				the_alpha += 10;	
-					alpha_proc.init_proc(alpha_proc.getAlpha() + INIT_ALPHA);
-					iterate_trees(i+1);
+					alphaProc.initProc(alphaProc.getAlpha() + INIT_ALPHA);
+					iterateTrees(i+1);
 				} else {
 					//TODO update.setStopTree();
 					return;
@@ -349,53 +349,53 @@ public class DecisionTreePruner {
 
 		
 		
-		private void prune_off(TreeNode candidate_node, int i) {	
-			System.out.println(tree_sol.getTree().getTargetDomain() + " " + candidate_node.getLabel());
-			LeafNode best_clone = new LeafNode(tree_sol.getTree().getTargetDomain(), candidate_node.getLabel());
-			best_clone.setRank(	candidate_node.getRank());
-			best_clone.setNumMatch(candidate_node.getNumMatch());				//num of matching instances to the leaf node
-			best_clone.setNumClassification(candidate_node.getNumLabeled());	//num of (correctly) classified instances at the leaf node
+		private void pruneOff(TreeNode candidateNode, int i) {	
+			System.out.println(treeSol.getTree().getTargetDomain() + " " + candidateNode.getLabel());
+			LeafNode bestClone = new LeafNode(treeSol.getTree().getTargetDomain(), candidateNode.getLabel());
+			bestClone.setRank(	candidateNode.getRank());
+			bestClone.setNumMatch(candidateNode.getNumMatch());				//num of matching instances to the leaf node
+			bestClone.setNumClassification(candidateNode.getNumLabeled());	//num of (correctly) classified instances at the leaf node
 
-			NodeUpdate update = new NodeUpdate(candidate_node, best_clone);
+			NodeUpdate update = new NodeUpdate(candidateNode, bestClone);
 			//TODO 
-			update.iteration_id(i); 
+			update.iterationId(i); 
 			
-			update.setDecisionTree(tree_sol.getTree());
+			update.setDecisionTree(treeSol.getTree());
 			//change_in_training_misclass += numExtraMisClassIfPrun(candidate_node); // extra misclassified guys
-			int num_leaves = candidate_node.getNumLeaves();
+			int numLeaves = candidateNode.getNumLeaves();
 
-			TreeNode father_node = candidate_node.getFather();
-			if (father_node != null) {
-				for(Object key: father_node.getChildrenKeys()) {
-					if (father_node.getChild(key).equals(candidate_node)) {
-						father_node.putNode(key, best_clone);
-						best_clone.setFather(father_node);
+			TreeNode fatherNode = candidateNode.getFather();
+			if (fatherNode != null) {
+				for(Object key: fatherNode.getChildrenKeys()) {
+					if (fatherNode.getChild(key).equals(candidateNode)) {
+						fatherNode.putNode(key, bestClone);
+						bestClone.setFather(fatherNode);
 						break;
 					}
 				}
-				updateLeaves(father_node, -num_leaves+1);
+				updateLeaves(fatherNode, -numLeaves+1);
 			} else {
 				// this node does not have any father node it is the root node of the tree
-				tree_sol.getTree().setRoot(best_clone);
+				treeSol.getTree().setRoot(bestClone);
 			}
 			
 			//updates.get(dt_0.getId()).add(update);
-			tree_sequence.add(update);
+			treeSequence.add(update);
 			
 		}
-		public void add_back(TreeNode leaf_node, TreeNode original_node) {
-			TreeNode father = leaf_node.getFather();
+		public void addBack(TreeNode leafNode, TreeNode originalNode) {
+			TreeNode father = leafNode.getFather();
 			if (father == null) {
-				tree_sol.getTree().setRoot(original_node);
+				treeSol.getTree().setRoot(originalNode);
 				return;
 			}
 			else {
-				int num_leaves = original_node.getNumLeaves();
+				int numLeaves = originalNode.getNumLeaves();
 				for(Object key: father.getChildrenKeys()) {
-					if (father.getChild(key).equals(leaf_node)) {
-						father.putNode(key, original_node);
-						original_node.setFather(father);
-						updateLeaves(father, num_leaves-1);
+					if (father.getChild(key).equals(leafNode)) {
+						father.putNode(key, originalNode);
+						originalNode.setFather(father);
+						updateLeaves(father, numLeaves-1);
 						break;
 					}
 				}
@@ -404,72 +404,72 @@ public class DecisionTreePruner {
 		
 		
 		
-		private void _update_tree_stats(PrunerStats stats, double computed_alpha, int change_in_training_error) {
+		private void updateTreeStats(PrunerStats stats, double computedAlpha, int changeInTrainingError) {
 
-			InstanceList learning_set = tree_sol.getList();
-			InstanceList validation_set = tree_sol.getTestList();
-			int num_error = 0;
-			SingleTreeTester t= new SingleTreeTester(tree_sol.getTree());
-			Stats test_stats = t.test(tree_sol.getTestList());
+			InstanceList learningSet = treeSol.getList();
+			InstanceList validationSet = treeSol.getTestList();
+			int numError = 0;
+			SingleTreeTester t= new SingleTreeTester(treeSol.getTree());
+			Stats testStats = t.test(treeSol.getTestList());
 			
 			//System.out.println(validation_set.getSize());
-			for (int index_i = 0; index_i < validation_set.getSize(); index_i++) {
-				Integer result = t.test(validation_set.getInstance(index_i));
+			for (int indexI = 0; indexI < validationSet.getSize(); indexI++) {
+				Integer result = t.test(validationSet.getInstance(indexI));
 				if (result == Stats.INCORRECT) {
-					num_error ++;
+					numError ++;
 				}
 			}
-			double percent_error = Util.division(num_error, validation_set.getSize());
-			System.out.println("From test: "+ test_stats.getResult(Stats.INCORRECT)/(double)test_stats.getTotal() + " x "+ percent_error);
-			int new_num_leaves = tree_sol.getTree().getRoot().getNumLeaves();
+			double percentError = Util.division(numError, validationSet.getSize());
+			System.out.println("From test: "+ testStats.getResult(Stats.INCORRECT)/(double)testStats.getTotal() + " x "+ percentError);
+			int newNumLeaves = treeSol.getTree().getRoot().getNumLeaves();
 			
 			//double new_resubstitution_cost = tree_sol.getTree().getTrainError() + Util.division(change_in_training_error, learning_set.getSize());
-			tree_sol.changeTrainError(change_in_training_error);//setTrainingError(new_resubstitution_cost);
+			treeSol.changeTrainError(changeInTrainingError);//setTrainingError(new_resubstitution_cost);
 			//tree_sol.setError();
-			double cost_complexity = tree_sol.getTrainError() + computed_alpha * (new_num_leaves);
+			double costComplexity = treeSol.getTrainError() + computedAlpha * (newNumLeaves);
 			
 			if (slog.debug() !=null)
-				slog.debug().log(":sequence_trees:cost_complexity of selected tree "+ cost_complexity +"\n");
+				slog.debug().log(":sequence_trees:cost_complexity of selected tree "+ costComplexity +"\n");
 			
 			
-			stats.setAlpha(computed_alpha);
-			stats.setErrorEstimation(percent_error);
-			stats.setTrainError(tree_sol.getTrainError());
+			stats.setAlpha(computedAlpha);
+			stats.setErrorEstimation(percentError);
+			stats.setTrainError(treeSol.getTrainError());
 			// Cost Complexity = Resubstitution Misclassification Cost + \alpha . Number of terminal nodes
-			stats.setCost_complexity(cost_complexity);
-			stats.setNum_terminal_nodes(new_num_leaves);
-			_tree_sequence_stats.add(stats);
+			stats.setCostComplexity(costComplexity);
+			stats.setNumTerminalNodes(newNumLeaves);
+			treeSequenceStats.add(stats);
 		}
 
 		// memory optimized
-		public void find_candidate_nodes(TreeNode my_node, ArrayList<TreeNode> nodes) {
+		public void findCandidateNodes(TreeNode myNode, ArrayList<TreeNode> nodes) {
 			
-			if (my_node instanceof LeafNode) {
+			if (myNode instanceof LeafNode) {
 				
 				//leaves.add((LeafNode) my_node);
 				return;
 			} else {
 				// if you prune that one k more instances are misclassified
 				
-				int k = numExtraMisClassIfPrun(my_node);
-				int num_leaves = my_node.getNumLeaves();
+				int k = numExtraMisClassIfPrun(myNode);
+				int numLeaves = myNode.getNumLeaves();
 				
 				if (k==0) {
 					if (slog.debug() !=null)
 						slog.debug().log(":search_alphas:k == 0\n" );
 					
 				}
-				double num_training_data = (double)tree_sol.getList().getSize();
-				double alpha = ( (double)k / num_training_data) /((double)(num_leaves-1));
+				double numTrainingData = (double)treeSol.getList().getSize();
+				double alpha = ( (double)k / numTrainingData) /((double)(numLeaves-1));
 				if (slog.debug() !=null)
-					slog.debug().log(":search_alphas:alpha "+ alpha+ "/"+alpha_proc.getAlpha()+ " k "+k+" num_leaves "+num_leaves+" all "+ tree_sol.getList().getSize() +  "\n");
+					slog.debug().log(":search_alphas:alpha "+ alpha+ "/"+alphaProc.getAlpha()+ " k "+k+" num_leaves "+numLeaves+" all "+ treeSol.getList().getSize() +  "\n");
 				
 				//the_alpha = alpha_proc.check_node(alpha, the_alpha, my_node, nodes);
-				alpha_proc.check_node(alpha, my_node, nodes);
+				alphaProc.checkNode(alpha, myNode, nodes);
 				
-				for (Object attributeValue : my_node.getChildrenKeys()) {
-					TreeNode child = my_node.getChild(attributeValue);
-					find_candidate_nodes(child, nodes);
+				for (Object attributeValue : myNode.getChildrenKeys()) {
+					TreeNode child = myNode.getChild(attributeValue);
+					findCandidateNodes(child, nodes);
 					//nodes.pop();
 				}				
 			}
@@ -477,7 +477,7 @@ public class DecisionTreePruner {
 		}
 		
 		public double getTheAlpha() {
-			return alpha_proc.getAlpha();
+			return alphaProc.getAlpha();
 		}
 		
 	
@@ -485,107 +485,107 @@ public class DecisionTreePruner {
 	
 	
 	public interface AlphaSelectionProc {
-		public double check_node(double cur_alpha, TreeNode cur_node, ArrayList<TreeNode> nodes);
-		public void init_proc(double value);
+		public double checkNode(double curAlpha, TreeNode curNode, ArrayList<TreeNode> nodes);
+		public void initProc(double value);
 		public double getAlpha();
 	}
 	
 	public class AnAlphaProc implements AlphaSelectionProc{
-		private double an_alpha;
+		private double anAlpha;
 		private double CART_EPSILON;
 		public AnAlphaProc(double value, double epsilon) {
-			an_alpha = value;
+			anAlpha = value;
 			CART_EPSILON = epsilon;
 		}
 //		public AnAlphaProc(double value) {
 //			an_alpha = value;
 //		}
-		public void init_proc(double value) {
+		public void initProc(double value) {
 			// TODO ????
 		}
 		
-		public double check_node(double cur_alpha, TreeNode cur_node, ArrayList<TreeNode> nodes) {
-			if (Util.epsilon(cur_alpha - an_alpha, CART_EPSILON)) {
+		public double checkNode(double curAlpha, TreeNode curNode, ArrayList<TreeNode> nodes) {
+			if (Util.epsilon(curAlpha - anAlpha, CART_EPSILON)) {
 				for(TreeNode parent:nodes) {
-					if (isChildOf(cur_node, parent))
-						return cur_alpha;// it is not added
+					if (isChildOf(curNode, parent))
+						return curAlpha;// it is not added
 				}
 				// add this one to the set
-				nodes.add(cur_node);
+				nodes.add(curNode);
 			}
-			return cur_alpha;
+			return curAlpha;
 		}
 
 		public double getAlpha() {
-			return an_alpha;
+			return anAlpha;
 		}
 	}
 	
 	public class MinAlphaProc implements AlphaSelectionProc{
-		private double sum_min_alpha, init_min;
-		private int num_minimum;
+		private double sumMinAlpha, initMin;
+		private int numMinimum;
 		
 		private double CART_EPSILON;
 		public MinAlphaProc(double value, double epsilon) {
-			init_min = value;
-			sum_min_alpha = 0;
-			num_minimum = 0;
+			initMin = value;
+			sumMinAlpha = 0;
+			numMinimum = 0;
 			CART_EPSILON = epsilon;
 		}
 		
-		public void init_proc(double value) {
-			init_min = value;
-			sum_min_alpha = 0;
-			num_minimum = 0;
+		public void initProc(double value) {
+			initMin = value;
+			sumMinAlpha = 0;
+			numMinimum = 0;
 		}
 		
-		public double check_node(double cur_alpha, TreeNode cur_node, ArrayList<TreeNode> nodes) {
-			double average_of_min_alphas = getAlpha();
+		public double checkNode(double curAlpha, TreeNode curNode, ArrayList<TreeNode> nodes) {
+			double averageOfMinAlphas = getAlpha();
 			if (slog.debug() !=null)
-				slog.debug().log(":search_alphas:alpha "+ cur_alpha+ "/"+average_of_min_alphas+ " diff "+(cur_alpha - average_of_min_alphas)+"\n");
+				slog.debug().log(":search_alphas:alpha "+ curAlpha+ "/"+averageOfMinAlphas+ " diff "+(curAlpha - averageOfMinAlphas)+"\n");
 			
-			if (Util.epsilon(cur_alpha - average_of_min_alphas, CART_EPSILON)) {
+			if (Util.epsilon(curAlpha - averageOfMinAlphas, CART_EPSILON)) {
 				// check if the cur_node is a child of any node that has been added to the list before.
 				for(TreeNode parent:nodes) {
-					if (isChildOf(cur_node, parent))
-						return cur_alpha;// if it is the case do not add the node
+					if (isChildOf(curNode, parent))
+						return curAlpha;// if it is the case do not add the node
 				}
 				// else add this one to the set
-				nodes.add(cur_node);
-				sum_min_alpha += cur_alpha;
-				num_minimum ++;
-				return cur_alpha;
-			} else if (cur_alpha < average_of_min_alphas) {
+				nodes.add(curNode);
+				sumMinAlpha += curAlpha;
+				numMinimum ++;
+				return curAlpha;
+			} else if (curAlpha < averageOfMinAlphas) {
 				
 				nodes.clear(); // can not put a new 'cause then it does not update the global one = new ArrayList<TreeNode>();
 				// remove the ones you found and replace with that one
 				//tree_sequence.get(dt_id).put(my_node), alpha
-				num_minimum = 1;
-				sum_min_alpha = cur_alpha;
-				nodes.add(cur_node);
-				return cur_alpha;
+				numMinimum = 1;
+				sumMinAlpha = curAlpha;
+				nodes.add(curNode);
+				return curAlpha;
 				
 			} else {
 				
 			}
-			return sum_min_alpha/num_minimum;
+			return sumMinAlpha/numMinimum;
 		}
 
 		public double getAlpha() {
-			if (num_minimum == 0)
-				return init_min;
+			if (numMinimum == 0)
+				return initMin;
 			else
-				return sum_min_alpha/num_minimum;
+				return sumMinAlpha/numMinimum;
 		}
 	}
-	public boolean isChildOf(TreeNode cur_node, TreeNode found_node) {
-		TreeNode parent = cur_node.getFather();
+	public boolean isChildOf(TreeNode curNode, TreeNode foundNode) {
+		TreeNode parent = curNode.getFather();
 		if (parent == null)
 			return false;
-		if (parent.equals(found_node))
+		if (parent.equals(foundNode))
 			return true;
 		else 
-			return isChildOf(parent, found_node);
+			return isChildOf(parent, foundNode);
 	}
 	
 	
@@ -596,9 +596,9 @@ public class DecisionTreePruner {
 		
 		private DecisionTree tree;
 		
-		private TreeNode old_node, node_update;
+		private TreeNode oldNode, nodeUpdate;
 		
-		private int iteration_id;
+		private int iterationId;
 		
 		// to set an node update with the worst cross validated error
 		public NodeUpdate(double error) {
@@ -606,20 +606,20 @@ public class DecisionTreePruner {
 			//cross_validated_cost = error;
 			
 			stopTree = false;
-			old_node = null;
-			node_update = null;
+			oldNode = null;
+			nodeUpdate = null;
 		}
-		public NodeUpdate(TreeNode old_n, LeafNode new_n) {
+		public NodeUpdate(TreeNode oldN, LeafNode newN) {
 			stopTree = false;
-			old_node = old_n;
-			node_update = new_n;
+			oldNode = oldN;
+			nodeUpdate = newN;
 		}
-		public void iteration_id(int i) {
-			iteration_id = i;
+		public void iterationId(int i) {
+			iterationId = i;
 		}
 		
-		public void setDecisionTree(DecisionTree dt_0) {
-			tree = dt_0;
+		public void setDecisionTree(DecisionTree dt0) {
+			tree = dt0;
 		}
 
 		public void setStopTree() {

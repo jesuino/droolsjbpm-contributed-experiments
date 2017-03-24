@@ -18,30 +18,30 @@ public class InstanceList {
 	private ArrayList<Instance> instances;
 	private InstanceFactory factory = null;
 	
-	public InstanceList(Schema _schema, WorkingMemory _session) {
-		this.schema = _schema;
+	public InstanceList(Schema schema, WorkingMemory session) {
+		this.schema = schema;
 		this.instances = new ArrayList<Instance>();
-		this.factory = new InstanceFactory(_session, _schema);
+		this.factory = new InstanceFactory(session, schema);
 	}
 	
 	// copy ctor
-	public InstanceList(InstanceList _il) {
-		this.schema = _il.schema;
-		this.instances = _il.instances;
-		this.factory = _il.factory;
+	public InstanceList(InstanceList il) {
+		this.schema = il.schema;
+		this.instances = il.instances;
+		this.factory = il.factory;
 	}
 	
 	// another copy constructor
-	public InstanceList(InstanceList _il, int size) {
-		this.schema = _il.schema;
+	public InstanceList(InstanceList il, int size) {
+		this.schema = il.schema;
 		this.instances = new ArrayList<Instance>(size);
-		this.factory = _il.factory;
+		this.factory = il.factory;
 	}
 
-	public void addStructuredInstance(Object _obj) {
+	public void addStructuredInstance(Object obj) {
 		//the factory will validate the object class during the execution
 		// create instance and all attributes according to the schema		
-		Instance inst = factory.createInstance(_obj);		
+		Instance inst = factory.createInstance(obj);		
 		
 		if (inst != null ) {
 			// the object is validated and the instance is created
@@ -49,7 +49,7 @@ public class InstanceList {
 			instances.add(inst);
 		} else {
 			if (slog.warn() != null)
-				slog.warn().log("The object "+_obj.getClass()+" is not related to the structure, couldnot create the instance\n");
+				slog.warn().log("The object "+obj.getClass()+" is not related to the structure, couldnot create the instance\n");
 			//System.exit(0);
 		}
 	}

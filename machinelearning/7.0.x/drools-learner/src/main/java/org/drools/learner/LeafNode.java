@@ -5,12 +5,12 @@ import org.drools.learner.tools.Util;
 public class LeafNode extends TreeNode {
 	
 	private Object targetCategory;
-	private double num_intances_classified;
+	private double numIntancesClassified;
 	
 	public LeafNode(Domain targetDomain, Object value) {
 		super(targetDomain);
 		this.targetCategory = value;
-		num_intances_classified = 0;
+		numIntancesClassified = 0;
 	}
 	
 	public void putNode(Object attributeCategory, TreeNode node) {
@@ -22,15 +22,15 @@ public class LeafNode extends TreeNode {
 	}
 	
 	public void setNumClassification(double size) {
-		this.num_intances_classified= size;
+		this.numIntancesClassified= size;
 	}
 	
 	public double getNumClassification() {
-		return this.num_intances_classified;
+		return this.numIntancesClassified;
 	}
 	
 	public int getMissClassified() {
-		return (int) (getNumMatch() - num_intances_classified);
+		return (int) (getNumMatch() - numIntancesClassified);
 	}
 	
 	public int getNumLeaves() {
@@ -64,7 +64,7 @@ public class LeafNode extends TreeNode {
 	public String toString(int tab, int depth, StringBuffer buf) {
 		buf.append(Util.ntimes("\t", tab + 1));
 		
-		buf.append( super.getDomain().getFName() + ":DECISION->" +targetCategory.toString() + " match: "+getNumMatch()+" correct:"+num_intances_classified+"\n");
+		buf.append( super.getDomain().getFName() + ":DECISION->" +targetCategory.toString() + " match: "+getNumMatch()+" correct:"+numIntancesClassified+"\n");
 		return buf.toString();
 	}
 	

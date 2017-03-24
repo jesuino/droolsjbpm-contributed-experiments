@@ -3,12 +3,12 @@ package org.drools.learner.eval;
 
 public class MaximumDepth implements StoppingCriterion {
 
-	private int limit_depth;
-	public MaximumDepth(int _depth) {
-		limit_depth = _depth;
+	private int limitDepth;
+	public MaximumDepth(int depth) {
+		limitDepth = depth;
 	}
-	public boolean stop(InformationContainer best_attr_eval) {
-		if (best_attr_eval.getDepth() <= limit_depth)
+	public boolean stop(InformationContainer bestAttrEval) {
+		if (bestAttrEval.getDepth() <= limitDepth)
 			return false;
 		else 
 			return true;

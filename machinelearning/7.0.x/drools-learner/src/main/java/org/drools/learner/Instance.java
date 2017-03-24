@@ -21,18 +21,18 @@ public class Instance {
 	
 	// name : _obj_klass+"@"+attr_name
 	// value : its value
-	public void setAttr(String _name, Object _value) {
-		Attribute f_attr = new Attribute();
-		f_attr.setName(_name);
-		f_attr.setValue(_value);
-		this.attributes.put(_name, f_attr);
+	public void setAttr(String name, Object value) {
+		Attribute fAttr = new Attribute();
+		fAttr.setName(name);
+		fAttr.setValue(value);
+		this.attributes.put(name, fAttr);
 	}
 	
-	public Attribute getAttr(String field_name) {
-		return attributes.get(field_name);
+	public Attribute getAttr(String fieldName) {
+		return attributes.get(fieldName);
 	}
-	public Object getAttrValue(String field_name) {
-		return attributes.get(field_name).getValue();
+	public Object getAttrValue(String fieldName) {
+		return attributes.get(fieldName).getValue();
 	}
 	
 	public int hashCode() {

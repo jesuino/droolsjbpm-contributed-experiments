@@ -3,50 +3,50 @@ package org.drools.learner.eval;
 public class PrunerStats extends TreeStats{
 
 
-	private int iteration_id;
+	private int iterationId;
 
-	private double cost_complexity;
+	private double costComplexity;
 	private double alpha;
 //	private double training_error;
 
 	public PrunerStats() {
-		iteration_id = 0;
+		iterationId = 0;
 	}
 	
 	public PrunerStats(TreeStats ts) {
 		super(ts.getTrainError(), ts.getErrorEstimation());
-		iteration_id = 0;
+		iterationId = 0;
 	}
 
 	// to set an node update with the worst cross validated error
 	public PrunerStats(double error1) {
 		super(error1);
-		iteration_id = 0;
+		iterationId = 0;
 		//test_cost = error;
 		
 	}
 	public PrunerStats(double error1, double error2) {
 		super(error1, error2);
-		iteration_id = 0;
+		iterationId = 0;
 		//test_cost = error;
 		
 	}
 
-	public void iteration_id(int i) {
-		iteration_id = i;
+	public void iterationId(int i) {
+		iterationId = i;
 	}
 
-	public int iteration_id() {
-		return iteration_id;
+	public int iterationId() {
+		return iterationId;
 	}
 
 
 	public double getCost_complexity() {
-		return cost_complexity;
+		return costComplexity;
 	}
 
-	public void setCost_complexity(double cost_complexity) {
-		this.cost_complexity = cost_complexity;
+	public void setCostComplexity(double costComplexity) {
+		this.costComplexity = costComplexity;
 	}
 
 	public double getAlpha() {

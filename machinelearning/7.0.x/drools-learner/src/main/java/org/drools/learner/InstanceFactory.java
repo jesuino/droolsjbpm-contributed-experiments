@@ -19,17 +19,17 @@ public class InstanceFactory {
 	
 	private WorkingMemory session;
 	private Schema schema;
-	public InstanceFactory(WorkingMemory _session, Schema _schema) {
-		session = _session;
-		schema = _schema;
+	public InstanceFactory(WorkingMemory session, Schema schema) {
+		this.session = session;
+		this.schema = schema;
 	}
 	
-	public Instance createInstance(Object _obj) {
+	public Instance createInstance(Object obj) {
 		try {
 			//if (schema.getClassStructure().containsKey(_obj.getClass())) {
-			if (schema.getObjectClass().isAssignableFrom(_obj.getClass())) {
+			if (schema.getObjectClass().isAssignableFrom(obj.getClass())) {
 				Instance i= new Instance();
-				boolean bok = instantiateAttributes(i, _obj, _obj.getClass());
+				boolean bok = instantiateAttributes(i, obj, obj.getClass());
 				if (!bok) {
 					if (slog.error() != null)
 						slog.error().log("What is going on, how come it is wrong : ");
@@ -50,7 +50,7 @@ public class InstanceFactory {
 		return null;
 	}
 
-	public boolean instantiateAttributes(Instance inst, Object _obj, Class<?> klass) throws Exception {
+	public boolean instantiateAttributes(Instance inst, Object obj, Class<?> klass) throws Exception {
 
 		if (slog.info() != null)
 			slog.info().log("Klass : "+ klass);
@@ -64,65 +64,65 @@ public class InstanceFactory {
 			if (slog.debug() != null)
 				slog.debug().log(":instantiateAttributes:structure has a label ");
 			for (Method m : struct.getMethods()) {
-				String m_name = m.getName();
+				String mName = m.getName();
 //				if (m_name.startsWith("get")) {//TODO check
 //					m_name = m_name.substring(3).toLowerCase();
 //				}
 				
-				DataType m_type = DataType.PRIMITIVE;// must be primitive
+				DataType mType = DataType.PRIMITIVE;// must be primitive
 				if (slog.debug() != null)
-					slog.debug().log("method= "+m_name + " m_type="+m_type+ "\n");
-				getAttributeValue(inst, _obj, m_name, m_type);
+					slog.debug().log("method= "+mName + " m_type="+mType+ "\n");
+				getAttributeValue(inst, obj, mName, mType);
 			}
 		}
 		// get the fields declared in the class
 		for (Field f : struct.getFields()) {
-			String f_name = f.getName();
-			DataType f_type = struct.getFieldType(f);
-			getAttributeValue(inst, _obj, f_name, f_type);
+			String fName = f.getName();
+			DataType fType = struct.getFieldType(f);
+			getAttributeValue(inst, obj, fName, fType);
 		}
 		if (!struct.getParent().equals(Object.class))
-			return instantiateAttributes(inst, _obj, struct.getParent());
+			return instantiateAttributes(inst, obj, struct.getParent());
 		
 		return true;
 	}
 	
-	public void getAttributeValue(Instance inst, Object _obj, String name, DataType type) throws Exception {
-		Class<?> _obj_klass = _obj.getClass();
-		String fReference = Util.getFReference(_obj_klass, name);
+	public void getAttributeValue(Instance inst, Object obj, String name, DataType type) throws Exception {
+		Class<?> objKlass = obj.getClass();
+		String fReference = Util.getFReference(objKlass, name);
 		switch (type) {
 		case PRIMITIVE:		// domain exist only for primitive types
 			Domain fieldDomain = schema.getAttrDomain(fReference);		
-			ReadAccessor f_extractor = schema.getAttrExtractor(fReference);
+			ReadAccessor fExtractor = schema.getAttrExtractor(fReference);
 			if (slog.info() != null)
-				slog.info().log("Field name : "+ name+ " of the object "+ _obj + " the extract:"+f_extractor+"\n");
+				slog.info().log("Field name : "+ name+ " of the object "+ obj + " the extract:"+fExtractor+"\n");
 			
 			//Object f_value = f_extractor.getValue( (InternalWorkingMemory) session, _obj);
-			Object f_value = f_extractor.getValue( _obj);
-			if (f_value != null) {
+			Object fValue = fExtractor.getValue( obj);
+			if (fValue != null) {
 				try {
-					if (fieldDomain.isPossible(f_value)) {
-						fieldDomain.addCategory(f_value);
-						inst.setAttr(fReference, f_value);
+					if (fieldDomain.isPossible(fValue)) {
+						fieldDomain.addCategory(fValue);
+						inst.setAttr(fReference, fValue);
 					}
 				} catch (Exception e) {
 					if (slog.debug() != null)
-						slog.debug().log("Domain: "+fieldDomain+ " could not add the value "+ f_value+ "\n");
+						slog.debug().log("Domain: "+fieldDomain+ " could not add the value "+ fValue+ "\n");
 					e.printStackTrace();
 				}
 			} else {
 				if (slog.debug() != null)
-					slog.debug().log("Field name : "+ name+ " of the object "+ _obj + " the extract:"+f_extractor+"\n");
+					slog.debug().log("Field name : "+ name+ " of the object "+ obj + " the extract:"+fExtractor+"\n");
 				if (slog.debug() != null)
 					slog.debug().log("The attribute value cannot be read, check the attribute\n");
 				System.exit(0);
 			}
 			break;
 		case STRUCTURED:	// the extractor exists for both types of data.
-			ReadAccessor complex_f_extractor = schema.getAttrExtractor(fReference);	// this returns an object to me
+			ReadAccessor complexFExtractor = schema.getAttrExtractor(fReference);	// this returns an object to me
 			//Object obj_value = complex_f_extractor.getValue( (InternalWorkingMemory) session, _obj);
-			Object obj_value = complex_f_extractor.getValue(_obj);
-			instantiateAttributes(inst, obj_value, obj_value.getClass());
+			Object objValue = complexFExtractor.getValue(obj);
+			instantiateAttributes(inst, objValue, objValue.getClass());
 			
 			break;
 		// case Collection

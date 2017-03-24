@@ -14,119 +14,119 @@ public class ClassDistribution {
 	//protected static final Logger flog = LoggerFactory.getFileLogger(ClassDistribution.class, LogLevel.ERROR, Util.log_file); 
 	
 	
-	protected Domain target_attr;
-	private Hashtable<Object, Double> quantity_by_class;
+	protected Domain targetAttr;
+	private Hashtable<Object, Double> quantityByClass;
 	
-	private String sum_key = Util.sum();
-	private int num_category_ideas;
-	private Object winner_category;
+	private String sumKey = Util.sum();
+	private int numCategoryIdeas;
+	private Object winnerCategory;
 	
 	public ClassDistribution(Domain targetDomain) {
-		this.target_attr = targetDomain;
+		this.targetAttr = targetDomain;
 		//System.out.println("(ClassDistribution)target_attr "+ target_attr);
-		this.quantity_by_class =  new Hashtable<Object, Double>(this.target_attr.getCategoryCount() + 1);		
-		for (int c=0; c<this.target_attr.getCategoryCount(); c++) {
-			Object category = this.target_attr.getCategory(c);
-			quantity_by_class.put(category, 0.0d);			
+		this.quantityByClass =  new Hashtable<Object, Double>(this.targetAttr.getCategoryCount() + 1);		
+		for (int c=0; c<this.targetAttr.getCategoryCount(); c++) {
+			Object category = this.targetAttr.getCategory(c);
+			quantityByClass.put(category, 0.0d);			
 		}
 		
-		quantity_by_class.put(sum_key, 0.0d);
+		quantityByClass.put(sumKey, 0.0d);
 		
-		num_category_ideas = 0;
+		numCategoryIdeas = 0;
 	}
 	
-	public ClassDistribution(ClassDistribution copy_dist) {
-		this.target_attr = copy_dist.getClassDomain();
-		this.quantity_by_class =  new Hashtable<Object, Double>(this.target_attr.getCategoryCount() + 1);		
-		this.setDistribution(copy_dist);
+	public ClassDistribution(ClassDistribution copyDist) {
+		this.targetAttr = copyDist.getClassDomain();
+		this.quantityByClass =  new Hashtable<Object, Double>(this.targetAttr.getCategoryCount() + 1);		
+		this.setDistribution(copyDist);
 		
-		this.num_category_ideas = copy_dist.get_num_ideas();
-		this.winner_category = copy_dist.get_winner_class();
+		this.numCategoryIdeas = copyDist.getNumIdeas();
+		this.winnerCategory = copyDist.getWinnerClass();
 		
 	}
 	
 	public void setSum(double sum) {
-		quantity_by_class.put(sum_key, sum);
+		quantityByClass.put(sumKey, sum);
 	}
 	
 	public double getSum() {
-		return quantity_by_class.get(sum_key);
+		return quantityByClass.get(sumKey);
 	}
 	
 	public Domain getClassDomain() {
-		return target_attr;
+		return targetAttr;
 	}
 	
-	public void change(Object target_category, double i) {
+	public void change(Object targetCategory, double i) {
 		/* TODO ????
 		 * if (target_category == sum_key) return;
 		 */
-		double num_1 = quantity_by_class.get(target_category);
-		num_1 += i;
-		quantity_by_class.put(target_category, num_1);
+		double num1 = quantityByClass.get(targetCategory);
+		num1 += i;
+		quantityByClass.put(targetCategory, num1);
 		
 		//quantity_by_class.put(target_category, quantity_by_class.get(target_category)+i);
 	}
 
 	public double getVoteFor(Object targetCategory) {
-		return quantity_by_class.get(targetCategory);
+		return quantityByClass.get(targetCategory);
 	}
 	
 	public void evaluateMajority() {
-		double winner_vote = 0.0d;
-		int num_ideas = 0;	// the number of target categories that the instances belong to
+		double winnerVote = 0.0d;
+		int numIdeas = 0;	// the number of target categories that the instances belong to
 		
 		Object winner = null;
 		
-		for (int c=0; c<this.target_attr.getCategoryCount(); c++) {
-			Object category = this.target_attr.getCategory(c);
+		for (int c=0; c<this.targetAttr.getCategoryCount(); c++) {
+			Object category = this.targetAttr.getCategory(c);
 			
-			double num_in_class = this.getVoteFor(category);
-			if (num_in_class > 0) {
-				num_ideas++;
-				if (num_in_class > winner_vote) {
-					winner_vote = num_in_class;
+			double numInClass = this.getVoteFor(category);
+			if (numInClass > 0) {
+				numIdeas++;
+				if (numInClass > winnerVote) {
+					winnerVote = numInClass;
 					winner = category;
 				}
 			}
 		}
 
-		this.set_num_ideas(num_ideas);
-		this.set_winner_class(winner);		
+		this.setNumIdeas(numIdeas);
+		this.setWinnerClass(winner);		
 	}
 	
-	public void set_num_ideas(int num_supperted_target_classes) {
-		this.num_category_ideas = num_supperted_target_classes;
+	public void setNumIdeas(int numSuppertedTargetClasses) {
+		this.numCategoryIdeas = numSuppertedTargetClasses;
 	}
 	
-	public void set_winner_class(Object the_winner_target_class) {
-		this.winner_category = the_winner_target_class;
+	public void setWinnerClass(Object theWinnerTargetClass) {
+		this.winnerCategory = theWinnerTargetClass;
 	}
 	
-	public int get_num_ideas() {
-		return this.num_category_ideas;
+	public int getNumIdeas() {
+		return this.numCategoryIdeas;
 	}
 	
-	public Object get_winner_class() {
-		return this.winner_category;
+	public Object getWinnerClass() {
+		return this.winnerCategory;
 	}
 	
 	public String toString() {
-		StringBuffer sb_out = new StringBuffer("ClassDist: target:"+ this.target_attr.getFName()+ " total: "+ this.getSum() + " & categories:");
-		for (int c=0; c<this.target_attr.getCategoryCount(); c++) {
-			Object category = this.target_attr.getCategory(c);
-			sb_out.append(this.getVoteFor(category) +" @"+category+ ", ");
+		StringBuffer sbOut = new StringBuffer("ClassDist: target:"+ this.targetAttr.getFName()+ " total: "+ this.getSum() + " & categories:");
+		for (int c=0; c<this.targetAttr.getCategoryCount(); c++) {
+			Object category = this.targetAttr.getCategory(c);
+			sbOut.append(this.getVoteFor(category) +" @"+category+ ", ");
 		}
 //		out +="\n";
-		return sb_out.toString();
+		return sbOut.toString();
 	}
 
 	public void setDistribution(ClassDistribution targetDist) {
-		for (int c=0; c<this.target_attr.getCategoryCount(); c++) {
-			Object category = this.target_attr.getCategory(c);
-			this.quantity_by_class.put(category, targetDist.getVoteFor(category));			
+		for (int c=0; c<this.targetAttr.getCategoryCount(); c++) {
+			Object category = this.targetAttr.getCategory(c);
+			this.quantityByClass.put(category, targetDist.getVoteFor(category));			
 		}
-		this.quantity_by_class.put(sum_key, targetDist.getSum());	
+		this.quantityByClass.put(sumKey, targetDist.getSum());	
 	}
 	
 

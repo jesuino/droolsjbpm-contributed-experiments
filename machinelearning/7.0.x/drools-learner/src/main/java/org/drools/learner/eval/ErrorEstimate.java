@@ -8,7 +8,7 @@ import org.drools.learner.builder.Learner;
 
 public interface ErrorEstimate {
 
-	public void validate(Learner _trainer, InstanceList _instances);
+	public void validate(Learner trainer, InstanceList instances);
 	
 	public int getEstimatorSize();
 	public DecisionTree getEstimator(int i);

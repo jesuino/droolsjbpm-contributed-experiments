@@ -24,19 +24,19 @@ public class SimpleLogger {
 		}
 	}
 
-	public SimpleLogger(int _lvl, LoggerInterface _logint) {
+	public SimpleLogger(int lvl, LoggerInterface logint) {
 		for (int i = 0; i <= LAST; ++i) {
-			if (i > _lvl)
+			if (i > lvl)
 				loggers[i] = null;
 			else {
-				loggers[i] = _logint.clone();
+				loggers[i] = logint.clone();
 				loggers[i].setMsg(msgs[i]);
 			}
 		}
 	}
 
-	public final LoggerInterface get(int _index) {
-		return loggers[_index];
+	public final LoggerInterface get(int index) {
+		return loggers[index];
 	}
 
 	public final LoggerInterface stat() {

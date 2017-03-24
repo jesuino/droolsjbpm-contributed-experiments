@@ -28,7 +28,7 @@ public class SingleTreeBuilder extends DecisionTreeBuilder{
 	 * the schema: the definition of the object instance 
 	 * 			(Class<?>) klass, String targetField, List<String> workingAttributes
 	 */
-	public void internalBuild(SolutionSet sol, Learner _trainer) {
+	public void internalBuild(SolutionSet sol, Learner trainer) {
 		
 		if (sol.getTargets().size()>1) {
 			//throw new FeatureNotSupported("There is more than 1 target candidates");
@@ -39,18 +39,18 @@ public class SingleTreeBuilder extends DecisionTreeBuilder{
 			// TODO put the feature not supported exception || implement it
 		}
 		
-		_trainer.setInputSpec(sol.getInputSpec());
-		_trainer.setTrainingDataSize(sol.getTrainSet().getSize()); 
-		DecisionTree one_tree = _trainer.instantiate_tree();
+		trainer.setInputSpec(sol.getInputSpec());
+		trainer.setTrainingDataSize(sol.getTrainSet().getSize()); 
+		DecisionTree oneTree = trainer.instantiateTree();
 		if (slog.debug() != null)
 			slog.debug().log("\n"+"Training a tree"+"\n");
-		_trainer.train_tree(one_tree, sol.getTrainSet());
-		one_tree.setID(0);
+		trainer.trainTree(oneTree, sol.getTrainSet());
+		oneTree.setID(0);
 		
-		Tester t = getTester(one_tree);
+		Tester t = getTester(oneTree);
 		Stats train = t.test(sol.getTrainSet());
 		Stats test = t.test(sol.getTestSet());
-		Solution best = new Solution(one_tree, sol.getTrainSet());
+		Solution best = new Solution(oneTree, sol.getTrainSet());
 		best.setTestList(sol.getTestSet());
 		best.setTrainStats(train);
 		best.setTestStats(test);

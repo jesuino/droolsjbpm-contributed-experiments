@@ -12,13 +12,13 @@ public class DecisionTreeVisitor {
 	
 	private HashMap<Integer, Path> paths;
 	
-	private int num_paths_found;
+	private int numPathsFound;
 	
 	public DecisionTreeVisitor() {
 		/* most important */
 		this.nodes = new Stack<NodeValue>();
 		this.paths = new HashMap<Integer, Path>();
-		num_paths_found = 0;
+		numPathsFound = 0;
 	}
 	
 	public void visit(DecisionTree dt) {
@@ -35,16 +35,16 @@ public class DecisionTreeVisitor {
 		
 	}
 	
-	private void dfs(TreeNode my_node, int tree_id) {
+	private void dfs(TreeNode mynode, int treeId) {
 		//System.out.println("How many guys there of "+my_node.getDomain().getName() +"  : "+my_node.getDomain().getValues().size());
 
-		if (my_node instanceof LeafNode) {
-			NodeValue leaf_value = new NodeValue(my_node);
-			leaf_value.setValue(((LeafNode) my_node).getCategory()); //getValue(null));
-			nodes.push(leaf_value);
+		if (mynode instanceof LeafNode) {
+			NodeValue leafValue = new NodeValue(mynode);
+			leafValue.setValue(((LeafNode) mynode).getCategory()); //getValue(null));
+			nodes.push(leafValue);
 			Path p = spitPath(nodes);
-			p.setTreeId(tree_id);
-			num_paths_found ++;
+			p.setTreeId(treeId);
+			numPathsFound ++;
 			if (!paths.containsKey(p.hashCode())) {
 				paths.put(p.hashCode(), p);
 			}
@@ -52,29 +52,29 @@ public class DecisionTreeVisitor {
 			return;
 		}
 		
-		for (Object attributeValue : my_node.getChildrenKeys()) {
+		for (Object attributeValue : mynode.getChildrenKeys()) {
 			//System.out.println("Domain: "+ my_node.getDomain().getName() + " the value:"+ attributeValue);
-			NodeValue node_value = new NodeValue(my_node);
-			node_value.setValue(attributeValue);		
-			nodes.push(node_value);
-			TreeNode child = my_node.getChild(attributeValue);
-			dfs(child, tree_id);
+			NodeValue nodeValue = new NodeValue(mynode);
+			nodeValue.setValue(attributeValue);		
+			nodes.push(nodeValue);
+			TreeNode child = mynode.getChild(attributeValue);
+			dfs(child, treeId);
 			nodes.pop();
 		}
 		return;
 	}
 	// memory optimized
-	private void dfs2(TreeNode my_node, int tree_id) {
+	private void dfs2(TreeNode myNode, int treeId) {
 		//System.out.println("How many guys there of "+my_node.getDomain().getName() +"  : "+my_node.getDomain().getValues().size());
-		NodeValue node_value = new NodeValue(my_node);
-		nodes.push(node_value);
-		if (my_node instanceof LeafNode) {
+		NodeValue nodeValue = new NodeValue(myNode);
+		nodes.push(nodeValue);
+		if (myNode instanceof LeafNode) {
 			//NodeValue leaf_value = new NodeValue(my_node);
-			node_value.setValue(((LeafNode) my_node).getCategory()); //getValue(null));
+			nodeValue.setValue(((LeafNode) myNode).getCategory()); //getValue(null));
 			//nodes.push(leaf_value);
 			//paths.add(getPath(nodes)); // if i can spit the rule here it would work
 			Path p = spitPath(nodes);
-			p.setTreeId(tree_id);
+			p.setTreeId(treeId);
 
 			if (!paths.containsKey(p.hashCode())) {
 				paths.put(p.hashCode(), p);
@@ -82,11 +82,11 @@ public class DecisionTreeVisitor {
 			return;
 		}
 		
-		for (Object attributeValue : my_node.getChildrenKeys()) {
+		for (Object attributeValue : myNode.getChildrenKeys()) {
 			//System.out.println("Domain: "+ my_node.getDomain().getName() + " the value:"+ attributeValue);
-			node_value.setValue(attributeValue);			
-			TreeNode child = my_node.getChild(attributeValue);
-			dfs2(child, tree_id);
+			nodeValue.setValue(attributeValue);			
+			TreeNode child = myNode.getChild(attributeValue);
+			dfs2(child, treeId);
 			nodes.pop();
 		}
 		return;
@@ -98,7 +98,7 @@ public class DecisionTreeVisitor {
 	}
 	
 	public int getNumPathsFound() {
-		return num_paths_found;
+		return numPathsFound;
 	}
 
 	public Collection<Path> getPathList() {

@@ -6,19 +6,19 @@ import org.drools.learner.eval.InformationContainer;
 public class ImpurityDecrease implements StoppingCriterion {
 
 	private double beta = 0.00001;
-	private int num_prunned;
+	private int numPrunned;
 	
 	public ImpurityDecrease() {
-		num_prunned = 0;
+		numPrunned = 0;
 	}
 	
-	public ImpurityDecrease(double _beta) {
-		num_prunned = 0;
-		beta = _beta;
+	public ImpurityDecrease(double beta) {
+		numPrunned = 0;
+		this.beta = beta;
 	}
-	public boolean stop(InformationContainer best_attr_eval) {
-		if (best_attr_eval.attribute_eval < beta) {
-			num_prunned ++;
+	public boolean stop(InformationContainer bestAttrEval) {
+		if (bestAttrEval.attributeEval < beta) {
+			numPrunned ++;
 			return true;
 		} else
 			return false;
@@ -26,7 +26,7 @@ public class ImpurityDecrease implements StoppingCriterion {
 	}
 	
 	public int getNumPruned(){
-		return num_prunned;
+		return numPrunned;
 	}
 
 }

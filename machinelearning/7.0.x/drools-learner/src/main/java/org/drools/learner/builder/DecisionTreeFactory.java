@@ -34,41 +34,41 @@ import org.drools.learner.tools.Util;
 // uses the static functions from the deprecated class DecisionTreeFactory
 public class DecisionTreeFactory {
 	
-	public static DecisionTree createSingleID3E(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
-		return createSingleID3(wm, obj_class, new Entropy());
+	public static DecisionTree createSingleID3E(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
+		return createSingleID3(wm, objClass, new Entropy());
 	}
 	
-	public static DecisionTree createSingleID3G(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
-		return createSingleID3(wm, obj_class, new GainRatio());
+	public static DecisionTree createSingleID3G(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
+		return createSingleID3(wm, objClass, new GainRatio());
 	}
 	
-	protected static DecisionTree createSingleID3(WorkingMemory wm, Class<? extends Object> obj_class, Heuristic h) throws FeatureNotSupported {	
+	protected static DecisionTree createSingleID3(WorkingMemory wm, Class<? extends Object> objClass, Heuristic h) throws FeatureNotSupported {	
 		/*
 		 * Quesitons:
-		 * 1- which class to work with? : obj_class
+		 * 1- which class to work with? : objClass
 		 * 2- what is its target attribute?
 		 * 3- what are the objects
 		 */ 
 		DataType data = Learner.DEFAULT_DATA;
 		ID3Learner learner = new ID3Learner(h);
-		SingleTreeBuilder single_builder = new SingleTreeBuilder();
+		SingleTreeBuilder singleBuilder = new SingleTreeBuilder();
 		
 //		String algo_suffices = org.drools.learner.deprecated.DecisionTreeFactory.getAlgoSuffices(learner.getDomainAlgo(), single_builder.getTreeAlgo());
-//		String executionSignature = org.drools.learner.deprecated.DecisionTreeFactory.getSignature(obj_class, "", algo_suffices);
-		String algo_suffices = DecisionTreeFactory.getAlgoSuffices(learner.getDomainAlgo(), single_builder.getTreeAlgo());
-		String executionSignature = DecisionTreeFactory.getSignature(obj_class, "", algo_suffices);
+//		String executionSignature = org.drools.learner.deprecated.DecisionTreeFactory.getSignature(objClass, "", algo_suffices);
+		String algoSuffices = DecisionTreeFactory.getAlgoSuffices(learner.getDomainAlgo(), singleBuilder.getTreeAlgo());
+		String executionSignature = DecisionTreeFactory.getSignature(objClass, "", algoSuffices);
 		
 		/* create the memory */
-		Memory mem = Memory.createFromWorkingMemory(wm, obj_class, learner.getDomainAlgo(), data);
+		Memory mem = Memory.createFromWorkingMemory(wm, objClass, learner.getDomainAlgo(), data);
 		mem.setTrainRatio(Util.DEFAULT_TRAINING_RATIO);
 		mem.setTestRatio(Util.DEFAULT_TESTING_RATIO);
 		mem.processTestSet();
 		
 		//Ruler save_me_please = new Ruler()
 		
-		SolutionSet product = single_builder.build(mem, learner);//obj_class, target_attr, working_attr
+		SolutionSet product = singleBuilder.build(mem, learner);//objClass, target_attr, working_attr
 		Solution s1 = product.getSolutions().get(0);
-		Tester t = single_builder.getTester(s1.getTree());
+		Tester t = singleBuilder.getTester(s1.getTree());
 		StatsPrinter.printLatex(t.test(s1.getList()), t.test(s1.getTestList()), executionSignature, false);
 		//single_builder.printLatex(executionSignature);
 		//
@@ -80,93 +80,93 @@ public class DecisionTreeFactory {
 //		Tester t2 = single_builder.getTester(pruner.getBestSolution().getTree());		
 //		StatsPrinter.printLatex(t2.test(s2.getList()), t2.test(s2.getTestList()), executionSignature, false);
 		
-		single_builder.getBestSolution().getTree().setSignature(executionSignature);
-		return single_builder.getBestSolution().getTree();
+		singleBuilder.getBestSolution().getTree().setSignature(executionSignature);
+		return singleBuilder.getBestSolution().getTree();
 	}
 	
 	/************************************************************************************************************************
 	 * Single Tree Builder Algorithms with C4.5 
 	 * @param wm
-	 * @param obj_class
+	 * @param objClass
 	 * @return
 	 * @throws FeatureNotSupported
 	 */	
-	public static DecisionTree createSingleC45E(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createSingleC45E(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
-		return createSingleC45(wm, obj_class, new Entropy(), criteria, null);
+		return createSingleC45(wm, objClass, new Entropy(), criteria, null);
 	}
 	
-	public static DecisionTree createSingleC45G(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createSingleC45G(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
-		return createSingleC45(wm, obj_class, new GainRatio(), criteria, null);
+		return createSingleC45(wm, objClass, new GainRatio(), criteria, null);
 	}
 	
-	public static DecisionTree createSingleC45E_worst(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createSingleC45EWorst(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
-		return createSingleC45(wm, obj_class, new MinEntropy(), criteria, null);
+		return createSingleC45(wm, objClass, new MinEntropy(), criteria, null);
 	}
 	
-	public static DecisionTree createSingleC45Random(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createSingleC45Random(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
-		return createSingleC45(wm, obj_class, new RandomInfo(), criteria, null);
+		return createSingleC45(wm, objClass, new RandomInfo(), criteria, null);
 	}
 	
-	public static DecisionTree createSingleC45E_Stop(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createSingleC45EStop(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(3);
 		criteria.add(new EstimatedNodeSize(0.5));
 		criteria.add(new ImpurityDecrease());
 		criteria.add(new MaximumDepth(50));
-		return createSingleC45(wm, obj_class, new Entropy(), criteria, null);
+		return createSingleC45(wm, objClass, new Entropy(), criteria, null);
 	}
 	
-	public static DecisionTree createSingleC45G_Stop(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createSingleC45GStop(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(3);
 		criteria.add(new EstimatedNodeSize(0.5));
 		criteria.add(new ImpurityDecrease());
 		criteria.add(new MaximumDepth(50));
-		return createSingleC45(wm, obj_class, new GainRatio(), criteria, null);
+		return createSingleC45(wm, objClass, new GainRatio(), criteria, null);
 	}
 	
-	public static DecisionTree createSingleC45E_PrunStop(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createSingleC45EPrunStop(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		DecisionTreePruner pruner = new DecisionTreePruner();
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
 		criteria.add(new EstimatedNodeSize(0.05));
-		return createSingleC45(wm, obj_class, new Entropy(), criteria, pruner);
+		return createSingleC45(wm, objClass, new Entropy(), criteria, pruner);
 	}
 	
-	public static DecisionTree createSingleC45G_PrunStop(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createSingleC45GPrunStop(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		DecisionTreePruner pruner = new DecisionTreePruner();
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
 		criteria.add(new EstimatedNodeSize(0.05));
-		return createSingleC45(wm, obj_class, new GainRatio(), criteria ,pruner);
+		return createSingleC45(wm, objClass, new GainRatio(), criteria ,pruner);
 	}
 	
-	protected static DecisionTree createSingleC45(WorkingMemory wm, Class<? extends Object> obj_class, 
+	protected static DecisionTree createSingleC45(WorkingMemory wm, Class<? extends Object> objClass, 
 													Heuristic h, 
 													ArrayList<StoppingCriterion> criteria,
 													DecisionTreePruner pruner) throws FeatureNotSupported {
 		DataType data = Learner.DEFAULT_DATA;
 		C45Learner learner = new C45Learner(h);
-		SingleTreeBuilder single_builder = new SingleTreeBuilder();
+		SingleTreeBuilder singleBuilder = new SingleTreeBuilder();
 		
-		String algo_suffices = DecisionTreeFactory.getAlgoSuffices(learner.getDomainAlgo(), single_builder.getTreeAlgo());
-		String executionSignature = DecisionTreeFactory.getSignature(obj_class, "", algo_suffices);
+		String algoSuffices = DecisionTreeFactory.getAlgoSuffices(learner.getDomainAlgo(), singleBuilder.getTreeAlgo());
+		String executionSignature = DecisionTreeFactory.getSignature(objClass, "", algoSuffices);
 		
 		/* create the memory */
-		Memory mem = Memory.createFromWorkingMemory(wm, obj_class, learner.getDomainAlgo(), data);
+		Memory mem = Memory.createFromWorkingMemory(wm, objClass, learner.getDomainAlgo(), data);
 //		mem.setTrainRatio(Util.DEFAULT_TRAINING_RATIO);
 //		mem.setTestRatio(Util.DEFAULT_TESTING_RATIO);
 		mem.processTestSet();
 		
 		for (StoppingCriterion sc: criteria) {	
 			if (sc instanceof MaximumDepth) {
-				int max_depth = (int)((mem.getClassInstances().getSchema().getAttrNames().size() - 1)*0.70 );
-				((MaximumDepth)sc).setDepth(max_depth);
+				int maxDepth = (int)((mem.getClassInstances().getSchema().getAttrNames().size() - 1)*0.70 );
+				((MaximumDepth)sc).setDepth(maxDepth);
 			}
 			learner.addStoppingCriteria(sc);
 		}
 		
-		SolutionSet product = single_builder.build(mem, learner);//obj_class, target_attr, working_attr
+		SolutionSet product = singleBuilder.build(mem, learner);//objClass, target_attr, working_attr
 		Solution s1 = product.getSolutions().get(0);
 		StatsPrinter.printLatexComment("ORIGINAL TREE", executionSignature, false);
 		StatsPrinter.printLatexComment(Stats.getErrors(), executionSignature, true);
@@ -178,14 +178,14 @@ public class DecisionTreeFactory {
 		if (pruner != null) {
 //			for (Solution sol: product.getSolutions())
 //				pruner.prun_to_estimate(sol);
-			pruner.prun_to_estimate(product);
+			pruner.prunToEstimate(product);
 			Solution s2 = pruner.getBestSolution();
-			Tester t2 = single_builder.getTester(pruner.getBestSolution().getTree());	
+			Tester t2 = singleBuilder.getTester(pruner.getBestSolution().getTree());	
 			StatsPrinter.printLatexComment("Pruned TREE", executionSignature, true);
 			StatsPrinter.printLatex(t2.test(s2.getList()), t2.test(s2.getTestList()), executionSignature, true);
 		}
-		single_builder.getBestSolution().getTree().setSignature(executionSignature);
-		return single_builder.getBestSolution().getTree();
+		singleBuilder.getBestSolution().getTree().setSignature(executionSignature);
+		return singleBuilder.getBestSolution().getTree();
 	}
 	
 	
@@ -194,51 +194,51 @@ public class DecisionTreeFactory {
 	/************************************************************************************************************************
 	 * Bagging Algorithms
 	 * @param wm
-	 * @param obj_class
+	 * @param objClass
 	 * @return
 	 * @throws FeatureNotSupported
 	 */	
-	public static DecisionTree createBagC45E(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createBagC45E(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
-		return createBagC45(wm, obj_class, new Entropy(), criteria, null);
+		return createBagC45(wm, objClass, new Entropy(), criteria, null);
 	}
 	
-	public static DecisionTree createBagC45G(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createBagC45G(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
-		return createBagC45(wm, obj_class, new GainRatio(), criteria, null);
+		return createBagC45(wm, objClass, new GainRatio(), criteria, null);
 	}
 	
-	public static DecisionTree createBagC45E_Stop(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createBagC45EStop(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(3);
 		criteria.add(new EstimatedNodeSize(0.5));
 		criteria.add(new ImpurityDecrease());
 		criteria.add(new MaximumDepth(50));
-		return createBagC45(wm, obj_class, new Entropy(), criteria, null);
+		return createBagC45(wm, objClass, new Entropy(), criteria, null);
 	}
 	
-	public static DecisionTree createBagC45G_Stop(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createBagC45GStop(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(3);
 		criteria.add(new EstimatedNodeSize(0.5));
 		criteria.add(new ImpurityDecrease());
 		criteria.add(new MaximumDepth(50));
-		return createBagC45(wm, obj_class, new GainRatio(), criteria, null);
+		return createBagC45(wm, objClass, new GainRatio(), criteria, null);
 	}
 	
-	public static DecisionTree createBagC45E_PrunStop(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createBagC45EPrunStop(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		DecisionTreePruner pruner = new DecisionTreePruner();
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
 		criteria.add(new EstimatedNodeSize(0.05));
-		return createBagC45(wm, obj_class, new Entropy(), criteria ,pruner);
+		return createBagC45(wm, objClass, new Entropy(), criteria ,pruner);
 	}
 	
-	public static DecisionTree createBagC45G_PrunStop(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createBagC45GPrunStop(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		DecisionTreePruner pruner = new DecisionTreePruner();
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
 		criteria.add(new EstimatedNodeSize(0.05));
-		return createBagC45(wm, obj_class, new GainRatio(), criteria ,pruner);
+		return createBagC45(wm, objClass, new GainRatio(), criteria ,pruner);
 	}
 	
-	protected static DecisionTree createBagC45(WorkingMemory wm, Class<? extends Object> obj_class, 
+	protected static DecisionTree createBagC45(WorkingMemory wm, Class<? extends Object> objClass, 
 													Heuristic h, 
 													ArrayList<StoppingCriterion> criteria,
 													DecisionTreePruner pruner) throws FeatureNotSupported {
@@ -246,25 +246,25 @@ public class DecisionTreeFactory {
 		C45Learner learner = new C45Learner(h);	
 		ForestBuilder forest = new ForestBuilder();
 		
-		String algo_suffices = DecisionTreeFactory.getAlgoSuffices(learner.getDomainAlgo(), forest.getTreeAlgo());
-		String executionSignature = DecisionTreeFactory.getSignature(obj_class, "", algo_suffices);
+		String algoSuffices = DecisionTreeFactory.getAlgoSuffices(learner.getDomainAlgo(), forest.getTreeAlgo());
+		String executionSignature = DecisionTreeFactory.getSignature(objClass, "", algoSuffices);
 		
 		/* create the memory */
-		Memory mem = Memory.createFromWorkingMemory(wm, obj_class, learner.getDomainAlgo(), data);
+		Memory mem = Memory.createFromWorkingMemory(wm, objClass, learner.getDomainAlgo(), data);
 		mem.setTrainRatio(Util.DEFAULT_TRAINING_RATIO);
 		mem.setTestRatio(Util.DEFAULT_TESTING_RATIO);
 		mem.processTestSet();
 		
 		for (StoppingCriterion sc: criteria) {	
 			if (sc instanceof MaximumDepth) {
-				int max_depth = (int)((mem.getClassInstances().getSchema().getAttrNames().size() - 1)*0.70 );
-				((MaximumDepth)sc).setDepth(max_depth);
+				int maxDepth = (int)((mem.getClassInstances().getSchema().getAttrNames().size() - 1)*0.70 );
+				((MaximumDepth)sc).setDepth(maxDepth);
 			}
 			learner.addStoppingCriteria(sc);
 		}
 		
 		
-		SolutionSet product = forest.build(mem, learner);//obj_class, target_attr, working_attr
+		SolutionSet product = forest.build(mem, learner);//objClass, target_attr, working_attr
 		StatsPrinter.printLatexComment("Builder errors", executionSignature, false);
 		StatsPrinter.printLatexComment(Stats.getErrors(), executionSignature, true);
 		StatsPrinter.printLatex(product.getGlobalTrainStats(), product.getGlobalTestStats(), executionSignature, true);
@@ -272,10 +272,10 @@ public class DecisionTreeFactory {
 		for (Solution s: product.getSolutions()) {
 			StatsPrinter.printLatex(s.getTrainStats(), s.getTestStats(), executionSignature, true);
 		}
-		Solution best_s = product.getBestSolution();
+		Solution bestS = product.getBestSolution();
 		StatsPrinter.printLatexComment("Best Original Tree", executionSignature, true);
-		StatsPrinter.printLatex(best_s.getTrainStats(), best_s.getTestStats(), executionSignature, true);
-		Tester t = forest.getTester(best_s.getTree());
+		StatsPrinter.printLatex(bestS.getTrainStats(), bestS.getTestStats(), executionSignature, true);
+		Tester t = forest.getTester(bestS.getTree());
 		StatsPrinter.printLatexComment("Best Original Tree(Global)", executionSignature, true);
 		StatsPrinter.printLatex(t.test(product.getTrainSet()), t.test(product.getTestSet()), executionSignature, true);
 
@@ -290,15 +290,15 @@ public class DecisionTreeFactory {
 //			product.setBestSolutionId(s2.getTree().getId());
 //			for (Solution sol: product.getSolutions())
 //			pruner.prun_to_estimate(sol);
-			pruner.prun_to_estimate(product);
+			pruner.prunToEstimate(product);
 			Solution s2 = pruner.getBestSolution();
 
 			Tester t2 = forest.getTester(s2.getTree());
 			StatsPrinter.printLatexComment("Best Pruned Tree", executionSignature, true);
 			StatsPrinter.printLatex(t2.test(s2.getList()), t2.test(s2.getTestList()), executionSignature, true);
-			Tester t2_global = forest.getTester(s2.getTree());
+			Tester t2Global = forest.getTester(s2.getTree());
 			StatsPrinter.printLatexComment("Best Original Tree(Global)", executionSignature, true);
-			StatsPrinter.printLatex(t2_global.test(product.getTrainSet()), t2_global.test(product.getTestSet()), executionSignature, true);
+			StatsPrinter.printLatex(t2Global.test(product.getTrainSet()), t2Global.test(product.getTestSet()), executionSignature, true);
 		}
 
 		forest.getBestSolution().getTree().setSignature(executionSignature);
@@ -311,77 +311,77 @@ public class DecisionTreeFactory {
 	/************************************************************************************************************************
 	 * Boosting Algorithms
 	 * @param wm
-	 * @param obj_class
+	 * @param objClass
 	 * @return
 	 * @throws FeatureNotSupported
 	 */	
-	public static DecisionTree createBoostC45E(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createBoostC45E(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
-		return createBoostC45(wm, obj_class, new Entropy(), criteria, null);
+		return createBoostC45(wm, objClass, new Entropy(), criteria, null);
 	}
 	
-	public static DecisionTree createBoostC45G(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createBoostC45G(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
-		return createBoostC45(wm, obj_class, new GainRatio(), criteria, null);
+		return createBoostC45(wm, objClass, new GainRatio(), criteria, null);
 	}
 	
-	public static DecisionTree createBoostC45E_Stop(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createBoostC45E_Stop(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(3);
 		criteria.add(new EstimatedNodeSize(0.5));
 		criteria.add(new ImpurityDecrease());
 		criteria.add(new MaximumDepth(50));
-		return createBoostC45(wm, obj_class, new Entropy(), criteria, null);
+		return createBoostC45(wm, objClass, new Entropy(), criteria, null);
 	}
 	
-	public static DecisionTree createBoostC45G_Stop(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createBoostC45GStop(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(3);
 		criteria.add(new EstimatedNodeSize(0.5));
 		criteria.add(new ImpurityDecrease());
 		criteria.add(new MaximumDepth(50));
-		return createBoostC45(wm, obj_class, new GainRatio(), criteria, null);
+		return createBoostC45(wm, objClass, new GainRatio(), criteria, null);
 	}
 	
-	public static DecisionTree createBoostC45E_PrunStop(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createBoostC45EPrunStop(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		DecisionTreePruner pruner = new DecisionTreePruner();
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
 		criteria.add(new EstimatedNodeSize(0.05));
-		return createBoostC45(wm, obj_class, new Entropy(), criteria ,pruner);
+		return createBoostC45(wm, objClass, new Entropy(), criteria ,pruner);
 	}
 	
-	public static DecisionTree createBoostC45G_PrunStop(WorkingMemory wm, Class<? extends Object> obj_class) throws FeatureNotSupported {
+	public static DecisionTree createBoostC45GPrunStop(WorkingMemory wm, Class<? extends Object> objClass) throws FeatureNotSupported {
 		DecisionTreePruner pruner = new DecisionTreePruner();
 		ArrayList<StoppingCriterion> criteria = new ArrayList<StoppingCriterion>(1);
 		criteria.add(new EstimatedNodeSize(0.05));
-		return createBoostC45(wm, obj_class, new GainRatio(), criteria ,pruner);
+		return createBoostC45(wm, objClass, new GainRatio(), criteria ,pruner);
 	}
 	
-	protected static DecisionTree createBoostC45(WorkingMemory wm, Class<? extends Object> obj_class, 
+	protected static DecisionTree createBoostC45(WorkingMemory wm, Class<? extends Object> objClass, 
 													Heuristic h, 
 													ArrayList<StoppingCriterion> criteria,
 													DecisionTreePruner pruner) throws FeatureNotSupported {
 		DataType data = Learner.DEFAULT_DATA;
 		C45Learner learner = new C45Learner(h);	
-		AdaBoostBuilder boosted_forest = new AdaBoostBuilder();
+		AdaBoostBuilder boostedForest = new AdaBoostBuilder();
 		
-		String algo_suffices = DecisionTreeFactory.getAlgoSuffices(learner.getDomainAlgo(), boosted_forest.getTreeAlgo());
-		String executionSignature = DecisionTreeFactory.getSignature(obj_class, "", algo_suffices);
+		String algoSuffices = DecisionTreeFactory.getAlgoSuffices(learner.getDomainAlgo(), boostedForest.getTreeAlgo());
+		String executionSignature = DecisionTreeFactory.getSignature(objClass, "", algoSuffices);
 		
 		/* create the memory */
-		Memory mem = Memory.createFromWorkingMemory(wm, obj_class, learner.getDomainAlgo(), data);
+		Memory mem = Memory.createFromWorkingMemory(wm, objClass, learner.getDomainAlgo(), data);
 		mem.setTrainRatio(Util.DEFAULT_TRAINING_RATIO);
 		mem.setTestRatio(Util.DEFAULT_TESTING_RATIO);
 		mem.processTestSet();
 		
 		for (StoppingCriterion sc: criteria) {	
 			if (sc instanceof MaximumDepth) {
-				int max_depth = (int)((mem.getClassInstances().getSchema().getAttrNames().size() - 1)*0.70 );
-				((MaximumDepth)sc).setDepth(max_depth);
+				int maxDepth = (int)((mem.getClassInstances().getSchema().getAttrNames().size() - 1)*0.70 );
+				((MaximumDepth)sc).setDepth(maxDepth);
 			}
 			learner.addStoppingCriteria(sc);
 		}
 		
 		
-		SolutionSet product = boosted_forest.build(mem, learner);//obj_class, target_attr, working_attr
+		SolutionSet product = boostedForest.build(mem, learner);//objClass, target_attr, working_attr
 		StatsPrinter.printLatexComment("Builder errors", executionSignature, false);
 		StatsPrinter.printLatexComment(Stats.getErrors(), executionSignature, true);
 		StatsPrinter.printLatex(product.getGlobalTrainStats(), product.getGlobalTestStats(), executionSignature, true);
@@ -389,9 +389,9 @@ public class DecisionTreeFactory {
 		for (Solution s: product.getSolutions()) {
 			StatsPrinter.printLatex(s.getTrainStats(), s.getTestStats(), executionSignature, true);
 		}
-		Solution best_s = product.getBestSolution();
+		Solution bestS = product.getBestSolution();
 		StatsPrinter.printLatexComment("Best Original Tree", executionSignature, true);
-		StatsPrinter.printLatex(best_s.getTrainStats(), best_s.getTestStats(), executionSignature, true);
+		StatsPrinter.printLatex(bestS.getTrainStats(), bestS.getTestStats(), executionSignature, true);
 
 		Tester.printStopping(learner.getStoppingCriteria(), Util.DRL_DIRECTORY +executionSignature);
 		
@@ -399,49 +399,49 @@ public class DecisionTreeFactory {
 		if (pruner != null) {
 //			for (Solution sol: product.getSolutions())
 //				pruner.prun_to_estimate(sol);
-			pruner.prun_to_estimate(product);
+			pruner.prunToEstimate(product);
 			Solution s2 = pruner.getBestSolution();
 //			System.out.println(s2.getTree().getId());
 //			product.setBestSolutionId(s2.getTree().getId());
-			Tester t2 = boosted_forest.getTester(pruner.getBestSolution().getTree());
+			Tester t2 = boostedForest.getTester(pruner.getBestSolution().getTree());
 			StatsPrinter.printLatexComment("Best Pruned Tree", executionSignature, true);
 			StatsPrinter.printLatex(t2.test(s2.getList()), t2.test(s2.getTestList()), executionSignature, true);
 			
-			Tester t2_global = boosted_forest.getTester(s2.getTree());
+			Tester t2Global = boostedForest.getTester(s2.getTree());
 			StatsPrinter.printLatexComment("Best Original Tree(Global)", executionSignature, true);
-			StatsPrinter.printLatex(t2_global.test(product.getTrainSet()), t2_global.test(product.getTestSet()), executionSignature, true);
+			StatsPrinter.printLatex(t2Global.test(product.getTrainSet()), t2Global.test(product.getTestSet()), executionSignature, true);
 		
 			
 		}
 
-		boosted_forest.getBestSolution().getTree().setSignature(executionSignature);
-		return boosted_forest.getBestSolution().getTree();
+		boostedForest.getBestSolution().getTree().setSignature(executionSignature);
+		return boostedForest.getBestSolution().getTree();
 	}
 	
 
 
 	
-	public static String getSignature(Class<? extends Object> obj_class, String fileName, String suffices) {
+	public static String getSignature(Class<? extends Object> objClass, String fileName, String suffices) {
 		
 		//String fileName = (dataFile == null || dataFile == "") ? this.getRuleClass().getSimpleName().toLowerCase(): dataFile; 			
 		String objectSignature = fileName;
 		if (objectSignature == null || objectSignature =="") {
-			objectSignature = obj_class.getSimpleName().toLowerCase();
+			objectSignature = objClass.getSimpleName().toLowerCase();
 			if (suffices != null && suffices != "")
 				objectSignature += "_"+ suffices;
 		}
 		
-		String packageFolders = obj_class.getPackage().getName();
-		String _packageNames = packageFolders.replace('.', '/');
-		String executionSignature = _packageNames+"/"+ objectSignature; //"src/main/rules/"+
+		String packageFolders = objClass.getPackage().getName();
+		String packageNames = packageFolders.replace('.', '/');
+		String executionSignature = packageNames+"/"+ objectSignature; //"src/main/rules/"+
 		
 		return executionSignature;
 		
 	}
 	
-	public static String getAlgoSuffices(DomainAlgo domain_a, TreeAlgo tree_a) {
+	public static String getAlgoSuffices(DomainAlgo domainA, TreeAlgo treeA) {
 		String suffix = "";
-		switch (domain_a) {
+		switch (domainA) {
 		case CATEGORICAL:
 			suffix += "id3" ;
 			break;
@@ -453,7 +453,7 @@ public class DecisionTreeFactory {
 		
 		}
 		
-		switch (tree_a) {
+		switch (treeA) {
 		case SINGLE:
 			suffix += "_one";
 			break;

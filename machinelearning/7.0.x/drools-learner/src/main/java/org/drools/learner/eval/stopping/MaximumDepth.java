@@ -5,25 +5,25 @@ import org.drools.learner.eval.InformationContainer;
 
 public class MaximumDepth implements StoppingCriterion {
 
-	private int limit_depth;
-	private int num_prunned;
-	public MaximumDepth(int _depth) {
-		limit_depth = _depth;
-		num_prunned = 0;
+	private int limitDepth;
+	private int numPrunned;
+	public MaximumDepth(int depth) {
+		limitDepth = depth;
+		numPrunned = 0;
 	}
-	public boolean stop(InformationContainer best_attr_eval) {
-		if (best_attr_eval.getDepth() <= limit_depth)
+	public boolean stop(InformationContainer bestAttrEval) {
+		if (bestAttrEval.getDepth() <= limitDepth)
 			return false;
 		else {
-			num_prunned++;
+			numPrunned++;
 			return true;
 		}
 	}
 	public int getNumPruned() {
-		return num_prunned;
+		return numPrunned;
 	}
-	public void setDepth(int max_depth) {
-		limit_depth = max_depth;
+	public void setDepth(int maxDepth) {
+		limitDepth = maxDepth;
 	}
 
 }

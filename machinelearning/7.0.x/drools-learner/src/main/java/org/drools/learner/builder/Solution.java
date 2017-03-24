@@ -7,14 +7,14 @@ import org.drools.learner.Stats;
 public class Solution {
 	
 	private DecisionTree dt;
-	private InstanceList training_list;
+	private InstanceList trainingList;
 	
-	private InstanceList test_list;
-	private Stats train_stats, test_stats;
+	private InstanceList testList;
+	private Stats trainStats, testStats;
 
-	public Solution(DecisionTree _dt, InstanceList list) {
-		dt = _dt;
-		training_list = list;
+	public Solution(DecisionTree dt, InstanceList list) {
+		this.dt = dt;
+		trainingList = list;
 	}
 
 	
@@ -23,46 +23,46 @@ public class Solution {
 	}
 
 	public InstanceList getList() {
-		return training_list;
+		return trainingList;
 	}
 	
 	public InstanceList getTestList() {
-		return test_list;
+		return testList;
 	}
 
 	public void setTestList(InstanceList test) {
-		test_list = test;
+		testList = test;
 	}
 
 	public void setTrainStats(Stats train) {
-		train_stats = train;
+		trainStats = train;
 	}
 	
 	public void setTestStats(Stats test) {
-		test_stats = test;
+		testStats = test;
 	}
 	
 	public Stats getTrainStats() {
-		return train_stats;
+		return trainStats;
 	}
 	
 	public Stats getTestStats() {
-		return test_stats;
+		return testStats;
 	}
 
 	public double getTrainError() {
-		System.out.println("Total Train"+ train_stats.getTotal()+ ", size "+ training_list.getSize());
-		return (double)train_stats.getResult(Stats.INCORRECT)/(double)train_stats.getTotal();
+		System.out.println("Total Train"+ trainStats.getTotal()+ ", size "+ trainingList.getSize());
+		return (double)trainStats.getResult(Stats.INCORRECT)/(double)trainStats.getTotal();
 	}
 
 	public double getTestError() {
-		System.out.println("Total Test"+ test_stats.getTotal()+ ", size "+ test_list.getSize());
-		return (double)test_stats.getResult(Stats.INCORRECT)/(double)test_stats.getTotal();
+		System.out.println("Total Test"+ testStats.getTotal()+ ", size "+ testList.getSize());
+		return (double)testStats.getResult(Stats.INCORRECT)/(double)testStats.getTotal();
 	}
 
 	public void changeTrainError(int change) {		
-		train_stats.change(Stats.INCORRECT, change);
-		train_stats.change(Stats.CORRECT, -1*change);	
+		trainStats.change(Stats.INCORRECT, change);
+		trainStats.change(Stats.CORRECT, -1*change);	
 	}
 	
 	public void setError(int change) {		

@@ -15,13 +15,13 @@ public class Stats {
 	
 	DecimalFormat precision = new DecimalFormat("#.###");
 	
-	private Class<?> stat_class;
+	private Class<?> statClass;
 	private ArrayList<Integer> histogram;
 	
-	private int total_data;
+	private int totalData;
 	
-	public Stats( Class<?> _stat_class) {
-		stat_class = _stat_class;
+	public Stats( Class<?> statClass) {
+		this.statClass = statClass;
 		
 		/*
 		 * INCORRECT | CORRECT | UNKNOWN
@@ -32,7 +32,7 @@ public class Stats {
 		for (int i=0; i < 3; i ++) {
 			histogram.add(new Integer(0));
 		}
-		total_data = 0;
+		totalData = 0;
 	}
 	public int getResult(int classification) {
 		return histogram.get(classification);
@@ -40,11 +40,11 @@ public class Stats {
 
 	public void change(Integer result, int i) {
 		histogram.set(result, Integer.valueOf(histogram.get(result) + i));
-		total_data += i;
+		totalData += i;
 	}
 	
 	public int getTotal() {
-		return total_data;
+		return totalData;
 	}
 	/*
 	 * fileSignature must contain the folder location

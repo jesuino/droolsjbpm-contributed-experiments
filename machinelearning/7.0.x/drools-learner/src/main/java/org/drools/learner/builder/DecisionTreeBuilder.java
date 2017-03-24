@@ -12,7 +12,7 @@ public abstract class DecisionTreeBuilder {
 	public static enum TreeAlgo { SINGLE, BAG, BOOST, BOOST_K }
 	
 	public SolutionSet solutions;
-	public int best_solution_id;
+	public int bestSolutionId;
 	
 	public SolutionSet build(Memory wm, Learner trainer) {
 		solutions = beforeBuild(wm);

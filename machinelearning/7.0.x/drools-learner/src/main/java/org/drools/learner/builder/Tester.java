@@ -22,13 +22,13 @@ public abstract class Tester{
 	
 	public abstract Stats test(InstanceList data);// String executionSignature
 	
-	public static Integer evaluate (Domain targetDomain, Instance i, Object tree_decision) {	
+	public static Integer evaluate (Domain targetDomain, Instance i, Object treeDecision) {	
 		String targetFName = targetDomain.getFReferenceName();
 		
-		Object tattr_value = i.getAttrValue(targetFName);
-		Object i_category = targetDomain.getCategoryOf(tattr_value);
+		Object attrValue = i.getAttrValue(targetFName);
+		Object iCategory = targetDomain.getCategoryOf(attrValue);
 		
-		if (AttributeValueComparator.instance.compare(i_category, tree_decision) == 0) {
+		if (AttributeValueComparator.instance.compare(iCategory, treeDecision) == 0) {
 			return Integer.valueOf(1); 	//correct
 		} else {
 			return Integer.valueOf(0);	// mistake

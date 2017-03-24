@@ -33,8 +33,8 @@ public class QuantitativeDomain extends Domain{
 
 	private ArrayList<SplitPoint> splits;
 	
-	private QuantitativeDomain(Class<?> _obj_klass, String _fname, Class<?> _ftype) {
-		super(_obj_klass, _fname, _ftype);
+	private QuantitativeDomain(Class<?> objKlass, String fname, Class<?> ftype) {
+		super(objKlass, fname, ftype);
 		super.setCategorical(false);	 // by deafault it is true, must set it to false
 		this.splits = new ArrayList<SplitPoint>();
 		
@@ -62,16 +62,16 @@ public class QuantitativeDomain extends Domain{
 	
 	public boolean addSplitPoint(SplitPoint pair) { //int index, Number value) {
 		
-		int insertion_point = Collections.binarySearch(this.splits, pair, getSplitComparator());
-		if (insertion_point >= 0) {
+		int insertionPoint = Collections.binarySearch(this.splits, pair, getSplitComparator());
+		if (insertionPoint >= 0) {
 			return false;	/* the pair exists in the list and the return is index of the search key*/
 		} else {			/* (-(insertion point) - 1)
 							* 	the point at which the key would be inserted into the list
 							* 	the index of the first element greater than the key, or list.size()
 							*/
-			int unfound_insertion_point = -(insertion_point) -1;
-			this.splits.add(unfound_insertion_point, pair);
-			super.fCategories.add(unfound_insertion_point, pair.getValue());
+			int unfoundInsertionPoint = -(insertionPoint) -1;
+			this.splits.add(unfoundInsertionPoint, pair);
+			super.fCategories.add(unfoundInsertionPoint, pair.getValue());
 			return true;
 		}
 		/* otherwise *

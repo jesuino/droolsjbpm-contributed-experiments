@@ -8,30 +8,30 @@ import org.drools.learner.Instance;
 public class InformationContainer {
 	
 	public Domain domain;
-	public double attribute_eval;
+	public double attributeEval;
 	//public double gain_ratio;
-	public ArrayList<Instance> sorted_data;
+	public ArrayList<Instance> sortedData;
 	
 	private InstDistribution stats;
 	private int depth;
-	private int total_num_data;
+	private int totalNumData;
 	
 	public InformationContainer() {
 		domain = null;
-		attribute_eval = 0.0;
-		sorted_data = null;
+		attributeEval = 0.0;
+		sortedData = null;
 
 		depth = 0;
 		stats = null;
-		total_num_data = 0;
+		totalNumData = 0;
 	}
 
-	public void setStats(InstDistribution data_stats) {
-		stats = data_stats;
+	public void setStats(InstDistribution dataStats) {
+		stats = dataStats;
 	}
 
-	public void setDepth(int _depth) {
-		depth = _depth;
+	public void setDepth(int depth) {
+		this.depth = depth;
 	}
 
 	public int getDepth() {
@@ -43,11 +43,11 @@ public class InformationContainer {
 
 	// total num of data fed to per tree
 	public void setTotalNumData(int num) {
-		total_num_data = num;
+		totalNumData = num;
 	}
 	
 	public int getTotalNumData() {
-		return total_num_data ;
+		return totalNumData ;
 	}
 	
 //	public InformationContainer(Domain _domain, double _attribute_eval, double _gain_ratio) {

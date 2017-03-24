@@ -7,7 +7,7 @@ import java.util.Iterator;
 public class Path {
 	
 	private int code;
-	private Class<?> attr_obj;	// object class name
+	private Class<?> attrObj;	// object class name
 	private ArrayList<NodeValue> conditions;
 	
 	private NodeValue action;
@@ -54,10 +54,10 @@ public class Path {
 		code = code + nv.hashCode() << 6;
 	}
 	public void setObjectClass(Class<?> obj) {
-		attr_obj= obj;
+		attrObj= obj;
 	}
 	public String getObjectClassName() {
-		return attr_obj.getSimpleName();
+		return attrObj.getSimpleName();
 	}
 	
 	public int getTreeId() {
@@ -146,15 +146,15 @@ public class Path {
 	}
 
 	public String toString() {
-		StringBuffer out_bf = new StringBuffer();
+		StringBuffer outBf = new StringBuffer();
 		
 		for (NodeValue c:conditions) {
 			//out_bf.append(c.stringCode() +" - ");
-			out_bf.append(c +", ");
+			outBf.append(c +", ");
 		}
 		//out_bf.append(" => "+action.stringCode());
-		out_bf.append(" => "+action);
-		return out_bf.toString();
+		outBf.append(" => "+action);
+		return outBf.toString();
 		
 	}
 }

@@ -22,9 +22,9 @@ public class TreeNode {
 	private double rank, infoMea;
 	
 	// Number of all instances matching at that node
-	private double num_matching_instances;
+	private double numMatchingInstances;
 	private Object label;
-	private int label_size;
+	private int labelSize;
 	private int leaves;
 	
 	private int depth;
@@ -48,16 +48,16 @@ public class TreeNode {
 		return rank;
 	}
 
-	public void setRank(double _rank) {
-		this.rank = _rank;
+	public void setRank(double rank) {
+		this.rank = rank;
 	}
 	
 	public void setNumMatch(double size) {
-		this.num_matching_instances= size;
+		this.numMatchingInstances= size;
 	}
 	
 	public double getNumMatch() {
-		return this.num_matching_instances;
+		return this.numMatchingInstances;
 	}
 	
 	public Domain getDomain() {
@@ -72,8 +72,8 @@ public class TreeNode {
 		return children.keySet();
 	}
 	
-	public TreeNode getChild(Object attr_key) {
-		return children.get(attr_key);
+	public TreeNode getChild(Object attrKey) {
+		return children.get(attrKey);
 	}
 	
 	public double getInfoMea() {
@@ -87,16 +87,16 @@ public class TreeNode {
 		return label;
 	}
 
-	public void setLabel(Object get_winner_class) {
-		label = get_winner_class;
+	public void setLabel(Object getWinnerClass) {
+		label = getWinnerClass;
 	}
 	
 	public void setNumLabeled(int supportersFor) {
-		label_size = supportersFor;
+		labelSize = supportersFor;
 	}
 	
 	public int getNumLabeled() {
-		return label_size;
+		return labelSize;
 	}
 	
 	public int getNumLeaves() {
@@ -114,10 +114,10 @@ public class TreeNode {
 		return father;
 	}
 	public Object voteFor(Instance i) {
-		final Object attr_value = i.getAttrValue(this.domain.getFReferenceName());
-		final Object category = domain.getCategoryOf(attr_value);
+		final Object attrValue = i.getAttrValue(this.domain.getFReferenceName());
+		final Object category = domain.getCategoryOf(attrValue);
 		
-		final TreeNode my_node = this.getChild(category);
+		final TreeNode myNode = this.getChild(category);
 		
 		
 //		flog.debug(new Object() {
@@ -135,16 +135,16 @@ public class TreeNode {
 //				return sb.toString();
 //			}
 //		});
-		return my_node.voteFor(i);
+		return myNode.voteFor(i);
 	}
 	
 	public int getMissClassified() {
-		int num_missclassified = 0;
+		int numMissclassified = 0;
 		for(Object key: this.getChildrenKeys()) {
 			TreeNode child = this.getChild(key);
-			num_missclassified += child.getMissClassified();
+			numMissclassified += child.getMissClassified();
 		}
-		return num_missclassified;
+		return numMissclassified;
 	}
 	
 	public int hashCode() {
@@ -160,7 +160,7 @@ public class TreeNode {
 		if (domain != null) {
 			buf.append(Util.ntimes("\t", tab));
 			buf.append(Util.ntimes("***",1));
-			buf.append( domain.getFName() + " n.hash:"+this.hashCode()+" match:" +num_matching_instances+" correct:"+label_size+ " \n");
+			buf.append( domain.getFName() + " n.hash:"+this.hashCode()+" match:" +numMatchingInstances+" correct:"+labelSize+ " \n");
 			for (Object attributeValue : children.keySet()) {
 				buf.append(Util.ntimes("\t", tab + 1));
 				buf.append("+" + attributeValue );

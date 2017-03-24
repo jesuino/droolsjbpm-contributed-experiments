@@ -46,7 +46,7 @@ public class NodeValue { //implements RuleNode {
 	public String toString() {
 		
 		String fName = this.getFName();//object class name
-		Class<?> node_obj = node.getDomain().getObjKlass();
+		Class<?> nodeObj = node.getDomain().getObjKlass();
 		
 		String value;
 		if (node.getDomain().getFType() == String.class)

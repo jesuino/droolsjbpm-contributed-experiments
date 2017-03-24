@@ -12,9 +12,9 @@ public class Domain {
 	private Class<?> fType, objKlass /*the class that attribute belongs to*/; // , ownerKlass;		// not sure if necessary
 	protected ArrayList<Object> fCategories;
 	
-	public Domain(Class<?> klass, String _name, Class<?> _type) {
-		this.fName = _name;
-		this.fType = _type;
+	public Domain(Class<?> klass, String name, Class<?> type) {
+		this.fName = name;
+		this.fType = type;
 		this.objKlass = klass;
 		
 		this.categorical = true;	// BY DEFAULT, it is categorical
@@ -49,8 +49,8 @@ public class Domain {
 	protected void setFName(String name) {
 		this.fName = name;
 	}
-	public void setFixed(boolean _fixed) {
-		this.fixed = _fixed;
+	public void setFixed(boolean fixed) {
+		this.fixed = fixed;
 	}
 
 	/** Indicates that this domain cannot be changed after creation */
@@ -58,8 +58,8 @@ public class Domain {
 		return this.fixed;
 	}
 	
-	public void setCategorical(boolean _cate) {
-		this.categorical = _cate;
+	public void setCategorical(boolean cate) {
+		this.categorical = cate;
 	}
 
 	/** Indicates that this domain has discrete set of values */
@@ -99,14 +99,14 @@ public class Domain {
 		return fCategories.size();
 	}
 	
-	public boolean isPossible(Object _value) throws Exception {
+	public boolean isPossible(Object value) throws Exception {
 		//System.out.println("Domain.isPossible() start "+ value+ " ?");
 //		since the value is coming from the extractor i dont check the type	
 //		if (_value.getClass()!= this.fType)
 //			return false;
 		//System.exit(0);
 		if (fixed) {// if it is boolean type actually you do not need to check for the contains function {TRUE, FALSE}
-			return this.containsValue(_value);
+			return this.containsValue(value);
 		} else {
 			return true;
 		}
@@ -135,7 +135,7 @@ public class Domain {
 			return value;
 		} else {
 	
-			int insertion_point = Collections.binarySearch(this.fCategories, value , AttributeValueComparator.instance);
+			int insertionPoint = Collections.binarySearch(this.fCategories, value , AttributeValueComparator.instance);
 			/*
 			 * index of the search key, if it is contained in the list; otherwise, (-(insertion point) - 1). 
 			 * The insertion point is defined as the point at which the key would be inserted into the list: 
@@ -143,15 +143,15 @@ public class Domain {
 			 * list are less than the specified key. Note that this guarantees that the return value will be >= 0 
 			 * if and only if the key is found.
 			 */
-			if (insertion_point >= 0) {
-				return this.fCategories.get(insertion_point);
+			if (insertionPoint >= 0) {
+				return this.fCategories.get(insertionPoint);
 			} else {
-				int unfound_insertion_point = -(insertion_point) -1;
-				if (unfound_insertion_point >= this.fCategories.size()) {
+				int unfoundInsertionPoint = -(insertionPoint) -1;
+				if (unfoundInsertionPoint >= this.fCategories.size()) {
 					//System.out.println("insestion point is the size domain "+this);
-					unfound_insertion_point = this.fCategories.size() -1;  
+					unfoundInsertionPoint = this.fCategories.size() -1;  
 				}
-				return this.fCategories.get(unfound_insertion_point);
+				return this.fCategories.get(unfoundInsertionPoint);
 			}
 		}
 	
@@ -160,8 +160,8 @@ public class Domain {
 		return ignore;
 	}
 	
-	public void ignore(boolean ignore_field) {
-		ignore = ignore_field;
+	public void ignore(boolean ignoreField) {
+		ignore = ignoreField;
 	}
 	
 	public boolean isNotJustSelected(Domain exceptDomain) {

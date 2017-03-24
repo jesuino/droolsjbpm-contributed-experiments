@@ -45,27 +45,27 @@ public class ForestBuilder extends DecisionTreeBuilder{
 //		test_evaluation = new ArrayList<Stats>(FOREST_SIZE);
 	}
 	
-	public void internalBuild(SolutionSet sol_set, Learner _trainer) {
-		_trainer.setInputSpec(sol_set.getInputSpec());
-		if (sol_set.getTargets().size()>1) {
+	public void internalBuild(SolutionSet solSet, Learner trainer) {
+		trainer.setInputSpec(solSet.getInputSpec());
+		if (solSet.getTargets().size()>1) {
 			//throw new FeatureNotSupported("There is more than 1 target candidates");
 			if (flog.error() !=null)
 				flog.error().log("There is more than 1 target candidates");
 			
 			System.exit(0);
 			// TODO put the feature not supported exception || implement it
-		} else if (_trainer.getTargetDomain().getCategoryCount() >2) {
+		} else if (trainer.getTargetDomain().getCategoryCount() >2) {
 			if (slog.error() !=null)
 				slog.error().log("The target domain is not binary!!!\n");
 			System.exit(0);
 		}
 		
 		
-		int N = sol_set.getTrainSet().getSize();
-		int tree_capacity = (int)(TREE_SIZE_RATIO * N);
-		_trainer.setTrainingDataSizePerTree(tree_capacity);
+		int N = solSet.getTrainSet().getSize();
+		int treeCapacity = (int)(TREE_SIZE_RATIO * N);
+		trainer.setTrainingDataSizePerTree(treeCapacity);
 		/* tree_capacity number of data fed to each tree, there are FOREST_SIZE trees*/
-		_trainer.setTrainingDataSize(tree_capacity * FOREST_SIZE);
+		trainer.setTrainingDataSize(treeCapacity * FOREST_SIZE);
 
 		
 		forest = new ArrayList<DecisionTree> (FOREST_SIZE);
@@ -73,17 +73,17 @@ public class ForestBuilder extends DecisionTreeBuilder{
 		int[] bag;		
 		while (i++ < FOREST_SIZE) {
 			if (WITH_REP)
-				bag = Util.bag_w_rep(tree_capacity, N);
+				bag = Util.bagWRep(treeCapacity, N);
 			else
-				bag = Util.bag_wo_rep(tree_capacity, N);
+				bag = Util.bagWoRep(treeCapacity, N);
 			
 			//InstanceList working_instances = class_instances.getInstances(bag);	
-			InstanceList working_instances = sol_set.getTrainSet().getInstances(bag);	
+			InstanceList workingInstances = solSet.getTrainSet().getInstances(bag);	
 			
-			DecisionTree dt = _trainer.instantiate_tree();
+			DecisionTree dt = trainer.instantiateTree();
 			if (slog.debug() != null)
 				slog.debug().log("\n"+"Training a tree"+"\n");
-			_trainer.train_tree(dt, working_instances);
+			trainer.trainTree(dt, workingInstances);
 			if (slog.debug() != null)
 				slog.debug().log("\n"+"the end"+ "\n");
 			dt.setID(i);
@@ -100,13 +100,13 @@ public class ForestBuilder extends DecisionTreeBuilder{
 			
 			// adding to the set of solutions
 			Tester t = getTester(dt);
-			Stats train = t.test(working_instances);
-			Stats test = t.test(sol_set.getTestSet());
-			Solution one = new Solution(dt, working_instances);
-			one.setTestList(sol_set.getTestSet());
+			Stats train = t.test(workingInstances);
+			Stats test = t.test(solSet.getTestSet());
+			Solution one = new Solution(dt, workingInstances);
+			one.setTestList(solSet.getTestSet());
 			one.setTrainStats(train);
 			one.setTestStats(test);
-			sol_set.addSolution(one);
+			solSet.addSolution(one);
 
 		}
 		
@@ -114,16 +114,16 @@ public class ForestBuilder extends DecisionTreeBuilder{
 //		train_evaluation.add(tester.test(sol_set.getTrainSet()));
 //		test_evaluation.add(tester.test(sol_set.getTestSet()));
 		
-		Tester global_tester = getTester(forest);
-		Stats train = global_tester.test(sol_set.getTrainSet());
-		Stats test = global_tester.test(sol_set.getTestSet());
-		sol_set.setGlobalTrainStats(train);
-		sol_set.setGlobalTestStats(test);
+		Tester globalTester = getTester(forest);
+		Stats train = globalTester.test(solSet.getTrainSet());
+		Stats test = globalTester.test(solSet.getTestSet());
+		solSet.setGlobalTrainStats(train);
+		solSet.setGlobalTestStats(test);
 		
 		//System.exit(0);
 		// TODO how to compute a best tree from the forest
-		int best_id = sol_set.getMinTestId();
-		sol_set.setBestSolutionId(best_id);
+		int bestId = solSet.getMinTestId();
+		solSet.setBestSolutionId(bestId);
 		
 		
 		
@@ -132,8 +132,8 @@ public class ForestBuilder extends DecisionTreeBuilder{
 	}
 	
 	
-	public Tester getTester(ArrayList<DecisionTree> _forest) {
-		return new ForestTester(_forest); 
+	public Tester getTester(ArrayList<DecisionTree> forest) {
+		return new ForestTester(forest); 
 	}
 	
 

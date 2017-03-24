@@ -19,15 +19,15 @@ public class ClassLogger {
 	private Class<?> klass;
 	private  Writer w;
 
-	public ClassLogger(Class<?> _class,  Writer _w) {
-		klass =_class;
-		w= _w;
+	public ClassLogger(Class<?> klass,  Writer w) {
+		this.klass = klass;
+		this.w= w;
 	}
 	
-	public ClassLogger(Class<?> _class, Writer _w, LogLevel _level) {
-		klass = _class;
-		level = _level;
-		w = _w;
+	public ClassLogger(Class<?> klass, Writer w, LogLevel level) {
+		this.klass = klass;
+		this.level = level;
+		this.w = w;
 	}
 	
 	

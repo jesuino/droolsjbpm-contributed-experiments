@@ -29,9 +29,9 @@ public class Entropy implements Heuristic{
 	 */
 	
 	protected static double multiplier = 1.0;
-	protected double data_eval; 
-	protected InstDistribution insts_by_target;
-	protected ArrayList<Instance> sorted_instances;
+	protected double dataEval; 
+	protected InstDistribution instsByTarget;
+	protected ArrayList<Instance> sortedInstances;
 	protected Domain domain;
 
 	public Entropy() {
@@ -42,39 +42,39 @@ public class Entropy implements Heuristic{
 	public Entropy(double m) {
 		multiplier = m;
 	}
-	public void init(InstDistribution _insts_by_target) {
-		insts_by_target = _insts_by_target;
-		data_eval = calc_info(insts_by_target);
-		sorted_instances = null;
+	public void init(InstDistribution instsByTarget) {
+		this.instsByTarget = instsByTarget;
+		dataEval = calcInfo(instsByTarget);
+		sortedInstances = null;
 		domain = null;
 	}
 	
 	
-	public double getEval(Domain attr_domain) {
-		CondClassDistribution insts_by_attr = info_attr(attr_domain);	
-		return multiplier *(data_eval - Entropy.calc_info_attr(insts_by_attr));
+	public double getEval(Domain attrDomain) {
+		CondClassDistribution instsByTarget = infoAttr(attrDomain);	
+		return multiplier *(dataEval - Entropy.calcInfoAttr(instsByTarget ));
 	}
 	
-	public double getEval_cont(Domain attr_domain) {
+	public double getEvalCont(Domain attrDomain) {
 		
-		double attribute_eval= 0.0d;
-		QuantitativeDomain trialDomain = QuantitativeDomain.createFromDomain(attr_domain);
+		double attributeEval= 0.0d;
+		QuantitativeDomain trialDomain = QuantitativeDomain.createFromDomain(attrDomain);
 
-		Categorizer visitor = new Categorizer(insts_by_target);
+		Categorizer visitor = new Categorizer(instsByTarget);
 		visitor.findSplits(trialDomain);
 
 		//	trial domain is modified				
 		if (trialDomain.getNumIndices() > 1) {
-			CondClassDistribution insts_by_attr = info_contattr(visitor); //.getSortedInstances(), trialDomain);
-			attribute_eval = data_eval - Entropy.calc_info_attr(insts_by_attr);
+			CondClassDistribution instsByAttr = infoContattr(visitor); //.getSortedInstances(), trialDomain);
+			attributeEval = dataEval - Entropy.calcInfoAttr(instsByAttr);
 		}
 		domain = trialDomain;
-		sorted_instances = visitor.getSortedInstances();
-		return multiplier *attribute_eval;
+		sortedInstances = visitor.getSortedInstances();
+		return multiplier *attributeEval;
 	}
 	
 	public double getDataEval() {
-		return data_eval;
+		return dataEval;
 	}
 	
 	public Domain getDomain() {
@@ -82,44 +82,44 @@ public class Entropy implements Heuristic{
 	}
 	
 	public ArrayList<Instance> getSortedInstances() {
-		return sorted_instances;
+		return sortedInstances;
 	}
 
 	public double getWorstEval() {
 		return -1000.0d;
 	}
 	
-	public CondClassDistribution info_attr(Domain attr_domain) {
+	public CondClassDistribution infoAttr(Domain attrDomain) {
 		
-		Domain target_domain = insts_by_target.getClassDomain();
+		Domain targetDomain = instsByTarget.getClassDomain();
 		
 		//flog.debug("What is the attributeToSplit? " + attr_domain);
 
 		/* initialize the hashtable */
-		CondClassDistribution insts_by_attr = new CondClassDistribution(attr_domain, target_domain);
-		insts_by_attr.setTotal(insts_by_target.getSum());
+		CondClassDistribution instsByAttr = new CondClassDistribution(attrDomain, targetDomain);
+		instsByAttr.setTotal(instsByTarget.getSum());
 		
 		//flog.debug("Cond distribution for "+ attr_domain + " \n"+ insts_by_attr);
 		
-		for (int category = 0; category<target_domain.getCategoryCount(); category++) {
-			Object targetCategory = target_domain.getCategory(category); 
+		for (int category = 0; category<targetDomain.getCategoryCount(); category++) {
+			Object targetCategory = targetDomain.getCategory(category); 
 			
-			for (Instance inst: insts_by_target.getSupportersFor(targetCategory)) {
-				Object inst_attr_category = inst.getAttrValue(attr_domain.getFReferenceName());
+			for (Instance inst: instsByTarget.getSupportersFor(targetCategory)) {
+				Object instAttrCategory = inst.getAttrValue(attrDomain.getFReferenceName());
 				
-				Object inst_class = inst.getAttrValue(target_domain.getFReferenceName());
+				Object instClass = inst.getAttrValue(targetDomain.getFReferenceName());
 				
-				if (!targetCategory.equals(inst_class)) {
+				if (!targetCategory.equals(instClass)) {
 					if (flog.error() != null)
-						flog.error().log("How the fuck they are not the same ? "+ targetCategory + " " + inst_class);
+						flog.error().log("How the fuck they are not the same ? "+ targetCategory + " " + instClass);
 					System.exit(0);
 				}
-				insts_by_attr.change(inst_attr_category, targetCategory, inst.getWeight()); //+1
+				instsByAttr.change(instAttrCategory, targetCategory, inst.getWeight()); //+1
 				
 			}
 		}
 		
-		return insts_by_attr;
+		return instsByAttr;
 	}
 	
 	
@@ -127,32 +127,32 @@ public class Entropy implements Heuristic{
 	 * a wrapper for the quantitative domain to be able to calculate the stats
 	 * */
 	//public static double info_contattr(InstanceList data, Domain targetDomain, QuantitativeDomain splitDomain) {
-	public CondClassDistribution info_contattr(Categorizer visitor) {
+	public CondClassDistribution infoContattr(Categorizer visitor) {
 		
 		List<Instance> data = visitor.getSortedInstances();
 		QuantitativeDomain splitDomain = visitor.getSplitDomain();
-		Domain targetDomain = insts_by_target.getClassDomain();
+		Domain targetDomain = instsByTarget.getClassDomain();
 		String targetAttr = targetDomain.getFReferenceName();
 		
-		CondClassDistribution instances_by_attr = new CondClassDistribution(splitDomain, targetDomain);
-		instances_by_attr.setTotal(data.size());
+		CondClassDistribution instancesByAttr = new CondClassDistribution(splitDomain, targetDomain);
+		instancesByAttr.setTotal(data.size());
 		
 		int index = 0;
-		int split_index = 0;
-		Object attr_key = splitDomain.getCategory(split_index);
+		int splitIndex = 0;
+		Object attrKey = splitDomain.getCategory(splitIndex);
 		for (Instance i : data) {
 			
-			if (index == splitDomain.getSplit(split_index).getIndex()+1 ) {
-				attr_key = splitDomain.getCategory(split_index+1);
-				split_index++;	
+			if (index == splitDomain.getSplit(splitIndex).getIndex()+1 ) {
+				attrKey = splitDomain.getCategory(splitIndex+1);
+				splitIndex++;	
 			}
 			Object targetKey = i.getAttrValue(targetAttr);
-			instances_by_attr.change(attr_key, targetKey, i.getWeight());	//+1
+			instancesByAttr.change(attrKey, targetKey, i.getWeight());	//+1
 			
 			index++;
 		}
 		
-		return instances_by_attr;
+		return instancesByAttr;
 //		double sum = calc_info_attr(instances_by_attr);
 //		return sum;
 		
@@ -161,19 +161,19 @@ public class Entropy implements Heuristic{
 	/*
 	 * for both 
 	 */
-	public static double calc_info_attr( CondClassDistribution instances_by_attr) {
+	public static double calcInfoAttr( CondClassDistribution instancesByAttr) {
 		//Collection<Object> attributeValues = instances_by_attr.getAttributes();
-		double data_size = instances_by_attr.getTotal();
+		double data_size = instancesByAttr.getTotal();
 		double sum = 0.0;
 		if (data_size>0)
-			for (int attr_idx=0; attr_idx<instances_by_attr.getNumCondClasses(); attr_idx++) {
-				Object attr_category = instances_by_attr.getCondClass(attr_idx);
-				double total_num_attr = instances_by_attr.getTotal_AttrCategory(attr_category);
+			for (int attrIdx=0; attrIdx<instancesByAttr.getNumCondClasses(); attrIdx++) {
+				Object attCategory = instancesByAttr.getCondClass(attrIdx);
+				double totalNumAttr = instancesByAttr.getTotalAttrCategory(attCategory);
 
-				if (total_num_attr > 0) {
-					double prob = total_num_attr / data_size;
+				if (totalNumAttr > 0) {
+					double prob = totalNumAttr / data_size;
 					//flog.debug("{("+total_num_attr +"/"+data_size +":"+prob +")* [");
-					double info =  calc_info(instances_by_attr.getDistributionOf(attr_category));
+					double info =  calcInfo(instancesByAttr.getDistributionOf(attCategory));
 
 					sum += prob * info;
 					//flog.debug("]} ");
@@ -188,22 +188,22 @@ public class Entropy implements Heuristic{
 	 * it returns the information value of facts entropy that characterizes the
 	 * (im)purity of an arbitrary collection of examples
 	 * 
-	 * @param quantity_by_class the distribution of the instances by the class attribute (target)
+	 * @param quantityByClass the distribution of the instances by the class attribute (target)
 	 */
-	public static double calc_info(ClassDistribution quantity_by_class) {
+	public static double calcInfo(ClassDistribution quantityByClass) {
 		
-		double data_size = quantity_by_class.getSum();
+		double dataSize = quantityByClass.getSum();
 		
 		double prob, sum = 0;
-		Domain target_domain = quantity_by_class.getClassDomain();
-		if (data_size > 0)
-		for (int category = 0; category<target_domain.getCategoryCount(); category++) {
+		Domain targetDomain = quantityByClass.getClassDomain();
+		if (dataSize > 0)
+		for (int category = 0; category<targetDomain.getCategoryCount(); category++) {
 			
-			Object targetCategory = target_domain.getCategory(category);
-			double num_in_class = quantity_by_class.getVoteFor(targetCategory);
+			Object targetCategory = targetDomain.getCategory(category);
+			double numInClass = quantityByClass.getVoteFor(targetCategory);
 
-			if (num_in_class > 0) {
-				prob = num_in_class / data_size;
+			if (numInClass > 0) {
+				prob = numInClass / dataSize;
 				/* TODO what if it is a sooo small number ???? */
 				//flog.debug("("+num_in_class+ "/"+data_size+":"+prob+")" +"*"+ Util.log2(prob) + " + ");
 				sum -=  prob * Util.log2(prob);

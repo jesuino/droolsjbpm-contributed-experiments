@@ -28,111 +28,111 @@ public class C45Learner extends Learner{
 	}
 	
 	
-	protected TreeNode train(DecisionTree dt, InstDistribution data_stats,  int depth) {//List<Instance> data) {
+	protected TreeNode train(DecisionTree dt, InstDistribution dataStats,  int depth) {//List<Instance> data) {
 		
-		if (data_stats.getSum() == 0) {
+		if (dataStats.getSum() == 0) {
 			throw new RuntimeException("Nothing to classify, factlist is empty");
 		}
 		
 		/* let's get the statistics of the results */
 		//InstDistribution stats_by_class = new InstDistribution(dt.getTargetDomain());///* the target domain*/);
-		data_stats.evaluateMajority();
+		dataStats.evaluateMajority();
 		
 		
 		/* if all elements are classified to the same value */
-		if (data_stats.get_num_ideas(/* number of supported target categories*/) == 1) {
+		if (dataStats.getNumIdeas(/* number of supported target categories*/) == 1) {
 
 			LeafNode classifiedNode = new LeafNode(dt.getTargetDomain()				/* target domain*/, 
-												   data_stats.get_winner_class() 	/*winner target category*/);
-			classifiedNode.setRank(	data_stats.getSum()/
+												   dataStats.getWinnerClass() 	/*winner target category*/);
+			classifiedNode.setRank(	dataStats.getSum()/
 									(double)this.getTrainingDataSize()/* total size of data fed to dt*/);
-			classifiedNode.setNumMatch(data_stats.getSum());						//num of matching instances to the leaf node
-			classifiedNode.setNumClassification(data_stats.getSum());				//num of classified instances at the leaf node
+			classifiedNode.setNumMatch(dataStats.getSum());						//num of matching instances to the leaf node
+			classifiedNode.setNumClassification(dataStats.getSum());				//num of classified instances at the leaf node
 			
 			//classifiedNode.setInfoMea(mea)
 			return classifiedNode;
 		}
 		
-		List<Domain> attribute_domains = dt.getAttrDomains();
+		List<Domain> attributeDomains = dt.getAttrDomains();
 		/* if  there is no attribute left in order to continue */
-		if (attribute_domains.size() == 0) {
+		if (attributeDomains.size() == 0) {
 			/* an heuristic of the leaf classification*/
-			Object winner = data_stats.get_winner_class();								/*winner target category*/
+			Object winner = dataStats.getWinnerClass();								/*winner target category*/
 			LeafNode noAttributeLeftNode = new LeafNode(dt.getTargetDomain()			/* target domain*/, 
 														winner);
-			noAttributeLeftNode.setRank(data_stats.getVoteFor(winner)/
+			noAttributeLeftNode.setRank(dataStats.getVoteFor(winner)/
 										(double)this.getTrainingDataSize()						/* total size of data fed to dt*/);
-			noAttributeLeftNode.setNumMatch(data_stats.getSum());						//num of matching instances to the leaf node
-			noAttributeLeftNode.setNumClassification(data_stats.getVoteFor(winner));	//num of classified instances at the leaf node
+			noAttributeLeftNode.setNumMatch(dataStats.getSum());						//num of matching instances to the leaf node
+			noAttributeLeftNode.setNumClassification(dataStats.getVoteFor(winner));	//num of classified instances at the leaf node
 			//noAttributeLeftNode.setInfoMea(best_attr_eval.attribute_eval);
 			
 			
 			/* we need to know how many guys cannot be classified and who these guys are */
-			data_stats.missClassifiedInstances(missclassified_data);
-			dt.changeTrainError((data_stats.getSum() - data_stats.getVoteFor(winner))/(double)getTrainingDataSize());
+			dataStats.missClassifiedInstances(missclassifiedData);
+			dt.changeTrainError((dataStats.getSum() - dataStats.getVoteFor(winner))/(double)getTrainingDataSize());
 			return noAttributeLeftNode;
 		}
 	
-		InformationContainer best_attr_eval = new InformationContainer();
-		best_attr_eval.setStats(data_stats);
-		best_attr_eval.setDepth(depth);
-		best_attr_eval.setTotalNumData(getTrainingDataSizePerTree());
+		InformationContainer bestAttrEval = new InformationContainer();
+		bestAttrEval.setStats(dataStats);
+		bestAttrEval.setDepth(depth);
+		bestAttrEval.setTotalNumData(getTrainingDataSizePerTree());
 
 		/* choosing the best attribute in order to branch at the current node*/
-		chooser.chooseAttribute(best_attr_eval, data_stats, attribute_domains);
+		chooser.chooseAttribute(bestAttrEval, dataStats, attributeDomains);
 		
 		if (super.criteria != null && criteria.size()>0) {
 			for (StoppingCriterion sc: criteria) 
-				if (sc.stop(best_attr_eval)) {
-					Object winner = data_stats.get_winner_class();
+				if (sc.stop(bestAttrEval)) {
+					Object winner = dataStats.getWinnerClass();
 					LeafNode majorityNode = new LeafNode(dt.getTargetDomain(), winner);
-					majorityNode.setRank((double)data_stats.getVoteFor(winner)/
+					majorityNode.setRank((double)dataStats.getVoteFor(winner)/
 										 (double)this.getTrainingDataSize()						/* total size of data fed to trainer*/);
-					majorityNode.setNumMatch(data_stats.getSum());
-					majorityNode.setNumClassification(data_stats.getVoteFor(winner));
+					majorityNode.setNumMatch(dataStats.getSum());
+					majorityNode.setNumClassification(dataStats.getVoteFor(winner));
 					
 					/* we need to know how many guys cannot be classified and who these guys are */
-					data_stats.missClassifiedInstances(missclassified_data);
-					dt.changeTrainError((data_stats.getSum() - data_stats.getVoteFor(winner))/(double)getTrainingDataSize());
+					dataStats.missClassifiedInstances(missclassifiedData);
+					dt.changeTrainError((dataStats.getSum() - dataStats.getVoteFor(winner))/(double)getTrainingDataSize());
 					return majorityNode;
 				}
 		}
-		Domain node_domain = best_attr_eval.domain;
+		Domain nodeDomain = bestAttrEval.domain;
 		if (slog.debug() != null)
-			slog.debug().log("\n"+Util.ntimes("*", 20)+" 1st best attr: "+ node_domain);
+			slog.debug().log("\n"+Util.ntimes("*", 20)+" 1st best attr: "+ nodeDomain);
 
-		TreeNode currentNode = new TreeNode(node_domain);
-		currentNode.setNumMatch(data_stats.getSum());									//num of matching instances to the leaf node
-		currentNode.setRank(data_stats.getSum()/
+		TreeNode currentNode = new TreeNode(nodeDomain);
+		currentNode.setNumMatch(dataStats.getSum());									//num of matching instances to the leaf node
+		currentNode.setRank(dataStats.getSum()/
 							(double)this.getTrainingDataSize()									/* total size of data fed to trainer*/);
-		currentNode.setInfoMea(best_attr_eval.attribute_eval);
+		currentNode.setInfoMea(bestAttrEval.attributeEval);
 		//what the highest represented class is and what proportion of items at that node actually are that class
-		currentNode.setLabel(data_stats.get_winner_class());
-		currentNode.setNumLabeled(data_stats.getSupportersFor(data_stats.get_winner_class()).size());
+		currentNode.setLabel(dataStats.getWinnerClass());
+		currentNode.setNumLabeled(dataStats.getSupportersFor(dataStats.getWinnerClass()).size());
 
-		Hashtable<Object, InstDistribution> filtered_stats = null;
+		Hashtable<Object, InstDistribution> filteredStats = null;
 		try {
-			filtered_stats = data_stats.split(best_attr_eval);
+			filteredStats = dataStats.split(bestAttrEval);
 		} catch (FeatureNotSupported e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}// node_domain);
 		
-		dt.FACTS_READ += data_stats.getSum();
+		dt.FACTS_READ += dataStats.getSum();
 		
-		for (int c = 0; c<node_domain.getCategoryCount(); c++) {
+		for (int c = 0; c<nodeDomain.getCategoryCount(); c++) {
 			/* split the last two class at the same time */
-			Object category = node_domain.getCategory(c);
+			Object category = nodeDomain.getCategory(c);
 			if (slog.debug() != null)
-				slog.debug().log("{"+ node_domain +":"+category+ "}"+(c==node_domain.getCategoryCount()-1?"\n":""));
+				slog.debug().log("{"+ nodeDomain +":"+category+ "}"+(c==nodeDomain.getCategoryCount()-1?"\n":""));
 			
 			/* list of domains except the choosen one (&target domain)*/
-			DecisionTree child_dt = new DecisionTree(dt, node_domain);	
-			child_dt.FACTS_READ = dt.FACTS_READ;
+			DecisionTree childDt = new DecisionTree(dt, nodeDomain);	
+			childDt.FACTS_READ = dt.FACTS_READ;
 			
-			if (filtered_stats == null || filtered_stats.get(category) == null || filtered_stats.get(category).getSum() ==0) {
+			if (filteredStats == null || filteredStats.get(category) == null || filteredStats.get(category).getSum() ==0) {
 				/* majority !!!! */
-				LeafNode majorityNode = new LeafNode(dt.getTargetDomain(), data_stats.get_winner_class());
+				LeafNode majorityNode = new LeafNode(dt.getTargetDomain(), dataStats.getWinnerClass());
 				majorityNode.setRank(-1.0);		//it does not classify any instance
 				majorityNode.setNumMatch(0);
 				majorityNode.setNumClassification(0);
@@ -142,7 +142,7 @@ public class C45Learner extends Learner{
 				majorityNode.setFather(currentNode);
 				currentNode.putNode(category, majorityNode);
 			} else {
-				TreeNode newNode = train(child_dt, filtered_stats.get(category), depth+1);//, attributeNames_copy
+				TreeNode newNode = train(childDt, filteredStats.get(category), depth+1);//, attributeNames_copy
 				newNode.setFather(currentNode);
 				currentNode.putNode(category, newNode);
 			}

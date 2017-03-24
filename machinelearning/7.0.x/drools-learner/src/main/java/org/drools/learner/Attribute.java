@@ -11,16 +11,16 @@ public class Attribute {
 		return name;
 	}
 	
-	public void setName(String _name) {
-		this.name = _name;
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 	public Object getValue() {
 		return value;
 	}
 	
-	public void setValue(Object _value) {
-		this.value = _value;
+	public void setValue(Object value) {
+		this.value = value;
 	}
 	
 	/* we assume that "another" points to the same attribute type as this */

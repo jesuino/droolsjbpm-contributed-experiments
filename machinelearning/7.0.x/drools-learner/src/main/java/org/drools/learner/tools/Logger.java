@@ -6,15 +6,15 @@ import java.io.Writer;
 public class Logger {
 	public static enum LogLevel_ { NULL, STAT, ERROR, WARN, DEBUG, INFO; }
 
-	private static NullLogMethod null_log = new NullLogMethod();
+	private static NullLogMethod nullLog = new NullLogMethod();
 
 	private Writer writer;
 	private Class<?> klass;
-	private LogMethod stat_m = null_log, error_m = null_log, warn_m = null_log, 
-										debug_m = null_log, info_m  = null_log ;
+	private LogMethod statM = nullLog, errorM = nullLog, warnM = nullLog, 
+										debugM = nullLog, infoM  = nullLog ;
 
-	public Logger(Class<?> _class, Writer w) {
-		klass = _class;
+	public Logger(Class<?> klass, Writer w) {
+		this.klass = klass;
 		writer = w;
 	}
 	public void setVerbosity(LogLevel_ lvl) {
@@ -34,23 +34,23 @@ public class Logger {
 	}
 	
 	public void stat(Object o) {
-		stat_m.log(o, writer);//"[stat](" + klass.getSimpleName() + ") " + 
+		statM.log(o, writer);//"[stat](" + klass.getSimpleName() + ") " + 
 	}
 	
 	public void error(Object o) {
-		error_m.log("[error](" + klass.getSimpleName() + ") " + o, writer);
+		errorM.log("[error](" + klass.getSimpleName() + ") " + o, writer);
 	}
 
 	public void warn(Object o) {
-		warn_m.log("[warn](" + klass.getSimpleName() + ") " + o, writer);
+		warnM.log("[warn](" + klass.getSimpleName() + ") " + o, writer);
 	}
 
 	public void debug(Object o) {
-		debug_m.log("[debug](" + klass.getSimpleName() + ") " + o, writer);
+		debugM.log("[debug](" + klass.getSimpleName() + ") " + o, writer);
 	}
 
 	public void info(Object o) {
-		info_m.log("[info](" + klass.getSimpleName() + ") " + o, writer);
+		infoM.log("[info](" + klass.getSimpleName() + ") " + o, writer);
 	}
 }
 

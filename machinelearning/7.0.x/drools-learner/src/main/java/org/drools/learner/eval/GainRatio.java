@@ -11,52 +11,52 @@ public class GainRatio extends Entropy implements Heuristic{
 	}
 
 
-	public double getEval(Domain attr_domain) {
-		CondClassDistribution insts_by_attr = super.info_attr(attr_domain);
-		double info_gain = super.data_eval - Entropy.calc_info_attr(insts_by_attr);
+	public double getEval(Domain attrDomain) {
+		CondClassDistribution instsByAttr = super.infoAttr(attrDomain);
+		double infoHain = super.dataEval - Entropy.calcInfoAttr(instsByAttr);
 	
-		double split_info = GainRatio.split_info(insts_by_attr);
+		double splitInfo = GainRatio.splitFnfo(instsByAttr);
 		
-		System.err.println("(GainRatio) info_gain = "+ info_gain + "/"+ split_info);
-		return info_gain /split_info;
+		System.err.println("(GainRatio) info_gain = "+ infoHain + "/"+ splitInfo);
+		return infoHain /splitInfo;
 	}
 
-	public double getEval_cont(Domain attr_domain) {
+	public double getEvalCont(Domain attrDomain) {
 		
-		double attribute_eval= 0.0d, split_info = 1.0d;
-		QuantitativeDomain trialDomain = QuantitativeDomain.createFromDomain(attr_domain);
+		double attributeEval= 0.0d, splitInfo = 1.0d;
+		QuantitativeDomain trialDomain = QuantitativeDomain.createFromDomain(attrDomain);
 
-		Categorizer visitor = new Categorizer(insts_by_target);
+		Categorizer visitor = new Categorizer(instsByTarget);
 		visitor.findSplits(trialDomain);
 
 		// trial domain is modified				
 		if (trialDomain.getNumIndices() > 1) {
-			CondClassDistribution insts_by_attr = super.info_contattr(visitor);
-			attribute_eval = super.data_eval - Entropy.calc_info_attr(insts_by_attr);
+			CondClassDistribution instsByAttr = super.infoContattr(visitor);
+			attributeEval = super.dataEval - Entropy.calcInfoAttr(instsByAttr);
 			
-			split_info = GainRatio.split_info(insts_by_attr);
+			splitInfo = GainRatio.splitFnfo(instsByAttr);
 		}
 		domain = trialDomain;
-		sorted_instances = visitor.getSortedInstances();
-		return attribute_eval / split_info;
+		sortedInstances = visitor.getSortedInstances();
+		return attributeEval / splitInfo;
 	}
 	
-	private static double split_info( CondClassDistribution instances_by_attr) {
+	private static double splitFnfo( CondClassDistribution instancesByAttr) {
 		//Collection<Object> attributeValues = instances_by_attr.getAttributes();
-		double data_size = instances_by_attr.getTotal();
+		double dataSize = instancesByAttr.getTotal();
 		double sum = 1.0;
-		if (data_size>0) {
-			for (int attr_idx = 0; attr_idx < instances_by_attr.getNumCondClasses(); attr_idx++) {
-				Object attr_category = instances_by_attr.getCondClass(attr_idx);
-				double num_in_attr = instances_by_attr.getTotal_AttrCategory(attr_category);
+		if (dataSize>0) {
+			for (int attrIdx = 0; attrIdx < instancesByAttr.getNumCondClasses(); attrIdx++) {
+				Object attrCategory = instancesByAttr.getCondClass(attrIdx);
+				double numInAttr = instancesByAttr.getTotalAttrCategory(attrCategory);
 
-				if (num_in_attr > 0.0) {
-					double prob = num_in_attr / data_size;
+				if (numInAttr > 0.0) {
+					double prob = numInAttr / dataSize;
 					sum -= prob * Util.log2(prob);
 				}
 			}
 		} else {
-			System.err.println("????? data_size = "+ data_size);
+			System.err.println("????? data_size = "+ dataSize);
 			System.exit(0);
 		}
 			

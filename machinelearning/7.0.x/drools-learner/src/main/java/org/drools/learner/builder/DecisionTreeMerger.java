@@ -18,7 +18,7 @@ public class DecisionTreeMerger {
 	
 	private DecisionTreeVisitor visitor;
 	
-	private ArrayList<Path> sorted_paths;
+	private ArrayList<Path> sortedPaths;
 	
 	public DecisionTreeMerger() {
 		visitor = new DecisionTreeVisitor();
@@ -40,8 +40,8 @@ public class DecisionTreeMerger {
 	}
 	
 	public void sortPaths() {
-		sorted_paths = new ArrayList<Path>(visitor.getPathList());
-		Collections.sort(sorted_paths, Path.getPathRankComparator());	
+		sortedPaths = new ArrayList<Path>(visitor.getPathList());
+		Collections.sort(sortedPaths, Path.getPathRankComparator());	
 	}
 	
 	public int getNumPaths() {
@@ -67,7 +67,7 @@ public class DecisionTreeMerger {
 		if (flog.warn() != null) {
 			flog.warn().log("Sorted paths: Total num of paths "+getNumPathsfound()+" num paths different"+getNumPaths()+ "\n");
 			slog.warn().log("Total num of paths "+getNumPathsfound()+" num paths different"+getNumPaths()+ "\n");
-			for (Path p: sorted_paths) {
+			for (Path p: sortedPaths) {
 				flog.warn().log(p.hashCode()+ "-"+p.getTreeId()+"-"+p.getRank()+" : "+ p + "\n");
 				slog.warn().log(p.hashCode()+ "-"+p.getTreeId()+"-"+p.getRank()+" : "+ p + "\n");
 			}
